@@ -125,6 +125,23 @@
     .company-name { font-weight: 800; color: var(--navy); }
     .company-meta { display: block; color: var(--muted); font-size: 10px; margin-top: 3px; }
     .action-link { color: var(--blue); font-weight: 800; font-size: 11px; cursor: pointer; border: 0; background: none; padding: 2px; }
+    .module-tabs { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; padding: 5px; background: #f1f5f9; border-radius: 11px; }
+    .tab-button { border: 0; border-radius: 8px; padding: 9px 12px; background: transparent; color: #66758b; font-size: 11px; font-weight: 800; }
+    .tab-button:hover { color: var(--navy); background: #fff; }
+    .tab-button.active { color: var(--blue); background: #fff; box-shadow: 0 2px 8px rgba(16,38,64,.08); }
+    .fiscal-tab-content, .accounting-tab-content { display: block; }
+    .ledger-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 15px; }
+    .ledger-kpi { padding: 12px; border: 1px solid var(--line); border-radius: 11px; background: #f9fbfd; }
+    .ledger-kpi small { display: block; color: var(--muted); font-size: 10px; }
+    .ledger-kpi strong { display: block; margin-top: 5px; font-size: 16px; }
+    .closing-flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+    .closing-step { border: 1px solid var(--line); border-radius: 12px; padding: 13px; background: #fff; }
+    .closing-step .step-badge { width: 25px; height: 25px; display: grid; place-items: center; border-radius: 50%; background: var(--teal-soft); color: var(--success); font-weight: 900; font-size: 11px; }
+    .closing-step strong { display: block; font-size: 11px; margin-top: 9px; }
+    .closing-step small { display: block; color: var(--muted); font-size: 10px; margin-top: 4px; line-height: 1.35; }
+    .field-chip { display: inline-flex; align-items: center; border: 1px solid #dce7f0; border-radius: 99px; padding: 5px 8px; font-size: 10px; color: #5b6d82; background: #f8fbfd; margin: 2px; }
+    .period-closed { border-color: #c7ebdd; background: #f0fbf7; color: #087a5e; }
+    .period-open { border-color: #f2dfae; background: #fffaf0; color: #9d6a00; }
     .stepper { display: flex; gap: 0; margin-bottom: 20px; overflow-x: auto; padding-bottom: 3px; }
     .step { flex: 1; min-width: 120px; position: relative; display: flex; align-items: center; gap: 8px; color: #9aa6b6; font-size: 11px; font-weight: 800; }
     .step:not(:last-child):after { content: ""; height: 1px; background: #dbe4ed; flex: 1; margin: 0 10px; }
@@ -222,7 +239,7 @@
       <button class="nav-item active" data-screen="dashboard"><span class="nav-icon">⌂</span>Visão geral</button>
       <button class="nav-item" data-screen="empresas"><span class="nav-icon">▦</span>Empresas</button>
       <button class="nav-item" data-screen="apuracao"><span class="nav-icon">▣</span>Fiscal</button>
-      <button class="nav-item" data-screen="relatorios"><span class="nav-icon">▤</span>Contábil</button>
+      <button class="nav-item" data-screen="contabil"><span class="nav-icon">▤</span>Contábil</button>
       <button class="nav-item" data-screen="rh"><span class="nav-icon">♙</span>Folha e RH</button>
       <button class="nav-item" data-screen="obrigacoes"><span class="nav-icon">✓</span>Obrigações</button>
       <button class="nav-item" data-screen="documentos"><span class="nav-icon">▱</span>Documentos</button>
@@ -265,13 +282,14 @@
         </section>
 
         <section class="screen" id="screen-empresas">
-          <div class="page-heading"><div><h1>Empresas</h1><p>Cadastre, consulte e acompanhe os clientes do escritório.</p></div><button class="button primary" data-action="new-company">＋ Nova empresa</button></div>
+          <div class="page-heading"><div><h1>Empresas</h1><p>Cadastre, consulte e acompanhe os clientes do escritório.</p></div><div class="toolbar"><button class="button secondary" data-action="new-accounting-entry">＋ Lançamento rápido</button><button class="button primary" data-action="new-company">＋ Nova empresa</button></div></div>
           <div class="panel"><div class="search-row"><input id="companySearch" class="input search" placeholder="Buscar por nome ou CNPJ..."><select id="companyRegime" class="select"><option value="">Todos os regimes</option><option>Simples Nacional</option><option>Lucro Presumido</option><option>Lucro Real</option></select><select id="companyStatus" class="select"><option value="">Todos os status</option><option>Ativa</option><option>Revisar</option></select></div><div class="table-wrap"><table><thead><tr><th>Empresa</th><th>CNPJ</th><th>Regime</th><th>Atividade</th><th>Competência</th><th>Status</th><th>Ação</th></tr></thead><tbody id="companiesTable"></tbody></table></div></div>
         </section>
 
         <section class="screen" id="screen-apuracao">
-          <div class="page-heading"><div><h1>Apuração fiscal</h1><p>Assistente demonstrativo para apuração mensal do Simples Nacional.</p></div><button class="button secondary" data-action="import-xml">⇧ Importar XMLs</button></div>
-          <div class="panel"><div class="stepper" id="wizardStepper"><div class="step active" data-wizard="1"><span class="step-number">1</span>Empresa</div><div class="step" data-wizard="2"><span class="step-number">2</span>Receitas</div><div class="step" data-wizard="3"><span class="step-number">3</span>Classificação</div><div class="step" data-wizard="4"><span class="step-number">4</span>Conferência</div><div class="step" data-wizard="5"><span class="step-number">5</span>Resultado</div></div>
+          <div class="page-heading"><div><h1>Fiscal</h1><p>Apuração, lançamentos, documentos e fechamento por competência.</p></div><div class="toolbar"><button class="button secondary" data-action="new-fiscal-entry">＋ Lançamento fiscal</button><button class="button" data-action="import-xml">⇧ Importar XMLs</button></div></div>
+          <div class="module-tabs" id="fiscalTabs"><button class="tab-button active" data-fiscal-tab="apurar">Apuração do Simples</button><button class="tab-button" data-fiscal-tab="lancamentos">Lançamentos fiscais</button><button class="tab-button" data-fiscal-tab="entradas">Entradas e saídas</button><button class="tab-button" data-fiscal-tab="fechamento">Conferência e fechamento</button></div>
+          <div id="fiscalApurar" class="fiscal-tab-content"><div class="panel"><div class="stepper" id="wizardStepper"><div class="step active" data-wizard="1"><span class="step-number">1</span>Empresa</div><div class="step" data-wizard="2"><span class="step-number">2</span>Receitas</div><div class="step" data-wizard="3"><span class="step-number">3</span>Classificação</div><div class="step" data-wizard="4"><span class="step-number">4</span>Conferência</div><div class="step" data-wizard="5"><span class="step-number">5</span>Resultado</div></div>
             <div class="wizard-content">
               <div class="wizard-panel active" data-wizard-panel="1"><h2 class="wizard-title">Selecione a empresa</h2><p class="wizard-subtitle">Comece escolhendo a empresa e o período que será apurado.</p><div class="form-grid"><div class="form-field"><label>Empresa</label><select class="select" id="wizardCompany"><option>ABC Serviços Ltda. — 12.345.678/0001-90</option><option>Comercial Brasil ME — 98.765.432/0001-11</option><option>Ribeiro Consultoria — 11.222.333/0001-55</option></select></div><div class="form-field"><label>Período de apuração</label><select class="select"><option>Agosto/2026</option><option>Julho/2026</option><option>Junho/2026</option></select></div><div class="form-field"><label>Regime de reconhecimento</label><select class="select"><option>Competência</option><option>Caixa</option></select><span class="helper">No sistema real, esta escolha ficaria bloqueada conforme a opção anual da empresa.</span></div><div class="form-field"><label>Responsável pela conferência</label><select class="select"><option>Carlos Alves</option><option>Equipe fiscal</option></select></div></div></div>
               <div class="wizard-panel" data-wizard-panel="2"><h2 class="wizard-title">Informe ou confira as receitas</h2><p class="wizard-subtitle">Os dados podem vir de XMLs importados ou de lançamento manual.</p><div class="form-grid"><div class="form-field"><label>Receita de serviços no mês</label><input class="input" id="revenueServices" value="28500,00"></div><div class="form-field"><label>Receita de comércio no mês</label><input class="input" value="0,00"></div><div class="form-field"><label>Receita recebida no mês</label><input class="input" value="26700,00"></div><div class="form-field"><label>Receita do mercado externo</label><input class="input" value="0,00"></div><div class="form-field full"><label>Observações</label><textarea class="input" rows="3" placeholder="Anote informações para a conferência..."></textarea></div></div></div>
@@ -280,6 +298,24 @@
               <div class="wizard-panel" data-wizard-panel="5"><h2 class="wizard-title">Resultado demonstrativo</h2><p class="wizard-subtitle">Este resultado é fictício e serve apenas para demonstrar a experiência de uso.</p><div class="grid-2 equal"><div class="summary-card"><div class="summary-line"><span>Receita bruta do período</span><strong>R$ 28.500,00</strong></div><div class="summary-line"><span>RBT12</span><strong>R$ 342.000,00</strong></div><div class="summary-line"><span>Alíquota efetiva simulada</span><strong>6,00%</strong></div><div class="summary-line"><span>DAS demonstrativo</span><strong style="color:var(--teal)">R$ 1.710,00</strong></div></div><div class="check-list"><div class="check ok"><span class="check-icon">✓</span><span>Memória de cálculo disponível</span></div><div class="check ok"><span class="check-icon">✓</span><span>Relatório pronto para revisão</span></div><div class="check warn"><span class="check-icon">!</span><span>Transmissão oficial desabilitada no protótipo</span></div></div></div></div>
             </div>
             <div class="wizard-footer"><button class="button" id="wizardBack" data-action="wizard-back">← Voltar</button><button class="button primary" id="wizardNext" data-action="wizard-next">Continuar →</button></div>
+          </div></div>
+          <div id="fiscalLancamentos" class="fiscal-tab-content hidden">
+            <div class="panel">
+              <div class="panel-title"><div><h2>Lançamentos fiscais</h2><p class="helper">Movimentações comuns que alimentam a apuração e a contabilidade.</p></div><button class="button primary small" data-action="new-fiscal-entry">＋ Novo lançamento</button></div>
+              <div class="ledger-kpis"><div class="ledger-kpi"><small>Documentos do período</small><strong>96</strong></div><div class="ledger-kpi"><small>Classificados</small><strong style="color:var(--success)">88</strong></div><div class="ledger-kpi"><small>Pendentes</small><strong style="color:var(--warning)">8</strong></div><div class="ledger-kpi"><small>Valor movimentado</small><strong>R$ 184.920,00</strong></div></div>
+              <div class="table-wrap"><table><thead><tr><th>Data</th><th>Documento</th><th>Operação</th><th>Participante</th><th>CFOP / natureza</th><th>Valor</th><th>Status</th><th>Ação</th></tr></thead><tbody id="fiscalTransactionsTable"></tbody></table></div>
+              <div style="margin-top:14px"><span class="field-chip">Data de emissão</span><span class="field-chip">Competência</span><span class="field-chip">Tipo de operação</span><span class="field-chip">CFOP</span><span class="field-chip">CST/CSOSN</span><span class="field-chip">NCM</span><span class="field-chip">Código de serviço</span><span class="field-chip">Retenções</span><span class="field-chip">Centro de custo</span></div>
+            </div>
+          </div>
+          <div id="fiscalEntradas" class="fiscal-tab-content hidden">
+            <div class="grid-2 equal">
+              <div class="panel"><div class="panel-title"><h2>Entradas do período</h2><button class="button small" data-action="new-fiscal-entry">＋ Registrar</button></div><div class="check-list"><div class="check ok"><span class="check-icon">✓</span><span>Notas de fornecedores importadas</span><span class="status green" style="margin-left:auto">62</span></div><div class="check warn"><span class="check-icon">!</span><span>Documentos sem classificação</span><span class="status yellow" style="margin-left:auto">4</span></div><div class="check ok"><span class="check-icon">✓</span><span>Retenções conferidas</span><span class="status green" style="margin-left:auto">18</span></div></div></div>
+              <div class="panel"><div class="panel-title"><h2>Saídas e serviços</h2><button class="button small" data-action="new-fiscal-entry">＋ Registrar</button></div><div class="check-list"><div class="check ok"><span class="check-icon">✓</span><span>NF-e/NFSe emitidas</span><span class="status green" style="margin-left:auto">34</span></div><div class="check warn"><span class="check-icon">!</span><span>Receitas sem documento</span><span class="status yellow" style="margin-left:auto">3</span></div><div class="check ok"><span class="check-icon">✓</span><span>Cancelamentos revisados</span><span class="status green" style="margin-left:auto">7</span></div></div></div>
+            </div>
+            <div class="panel" style="margin-top:16px"><div class="panel-title"><h2>Campos obrigatórios da movimentação fiscal</h2><span class="status blue">Configuração por operação</span></div><div><span class="field-chip">Empresa / filial</span><span class="field-chip">Data e competência</span><span class="field-chip">Entrada / saída / serviço</span><span class="field-chip">Fornecedor ou cliente</span><span class="field-chip">Documento e série</span><span class="field-chip">CFOP / natureza</span><span class="field-chip">CST / CSOSN</span><span class="field-chip">NCM / serviço</span><span class="field-chip">Base e alíquota</span><span class="field-chip">Retenções</span></div></div>
+          </div>
+          <div id="fiscalFechamento" class="fiscal-tab-content hidden">
+            <div class="panel"><div class="panel-title"><div><h2>Fechamento fiscal da competência</h2><p class="helper">O período só deve ser encerrado depois da conferência dos lançamentos e documentos.</p></div><button class="button primary" data-action="close-period">Encerrar competência</button></div><div class="closing-flow"><div class="closing-step"><div class="step-badge">1</div><strong>Documentos importados</strong><small>96 de 100 documentos recebidos.</small><span class="status green" style="margin-top:9px">96%</span></div><div class="closing-step"><div class="step-badge">2</div><strong>Lançamentos classificados</strong><small>88 itens prontos para apuração.</small><span class="status yellow" style="margin-top:9px">8 pendentes</span></div><div class="closing-step"><div class="step-badge">3</div><strong>Conferência fiscal</strong><small>Verifique divergências, retenções e receitas.</small><span class="status yellow" style="margin-top:9px">Revisar</span></div><div class="closing-step"><div class="step-badge">4</div><strong>Período</strong><small>Depois de encerrado, novos lançamentos exigem reabertura autorizada.</small><span id="fiscalPeriodStatus" class="status period-open" style="margin-top:9px">Em aberto</span></div></div></div>
           </div>
         </section>
 
@@ -298,6 +334,23 @@
           <div class="page-heading"><div><h1>Folha e RH</h1><p>Primeira visão dos colaboradores, folha e eventos trabalhistas.</p></div><button class="button primary" data-action="new-employee">＋ Novo colaborador</button></div>
           <div class="metrics"><div class="metric"><div class="metric-top"><span>Colaboradores</span><span class="metric-icon">♙</span></div><div class="metric-value">46</div><div class="metric-note">em 12 empresas</div></div><div class="metric"><div class="metric-top"><span>Folhas pendentes</span><span class="metric-icon">◷</span></div><div class="metric-value">3</div><div class="metric-note">competência agosto</div></div><div class="metric"><div class="metric-top"><span>Férias próximas</span><span class="metric-icon">▣</span></div><div class="metric-value">5</div><div class="metric-note">nos próximos 30 dias</div></div><div class="metric"><div class="metric-top"><span>Eventos eSocial</span><span class="metric-icon">✓</span></div><div class="metric-value">2</div><div class="metric-note"><span class="down">pendentes</span> de conferência</div></div></div>
           <div class="grid-2 equal"><div class="panel"><div class="panel-title"><h2>Colaboradores recentes</h2><a data-action="show-all-employees">Ver todos</a></div><div class="table-wrap"><table><thead><tr><th>Colaborador</th><th>Empresa</th><th>Cargo</th><th>Folha</th><th>Ação</th></tr></thead><tbody id="employeesTable"></tbody></table></div></div><div class="panel"><div class="panel-title"><h2>Próximos eventos</h2><a data-screen="obrigacoes">Ver agenda</a></div><div class="obligation-row"><div class="date-box"><strong>07</strong><small>set</small></div><div class="obligation-info"><strong>Fechamento da folha</strong><small>ABC Serviços Ltda. · responsável: RH</small></div><span class="status yellow">Pendente</span></div><div class="obligation-row"><div class="date-box"><strong>15</strong><small>set</small></div><div class="obligation-info"><strong>Envio de eventos eSocial</strong><small>12 empresas · lote mensal</small></div><span class="status blue">Programado</span></div><div class="obligation-row"><div class="date-box"><strong>30</strong><small>set</small></div><div class="obligation-info"><strong>Férias de Juliana Costa</strong><small>Comercial Brasil ME</small></div><span class="status green">Em dia</span></div></div></div>
+        </section>
+
+        <section class="screen" id="screen-contabil">
+          <div class="page-heading"><div><h1>Contábil</h1><p>Lançamentos, partidas, plano de contas, conciliação e fechamento.</p></div><div class="toolbar"><button class="button secondary" data-action="new-accounting-entry">＋ Lançamento comum</button><button class="button primary" data-action="close-period">Fechar competência</button></div></div>
+          <div class="module-tabs" id="accountingTabs"><button class="tab-button active" data-accounting-tab="lancamentos">Lançamentos</button><button class="tab-button" data-accounting-tab="plano">Plano de contas</button><button class="tab-button" data-accounting-tab="balancete">Balancete</button><button class="tab-button" data-accounting-tab="conciliacao">Conciliação</button><button class="tab-button" data-accounting-tab="fechamento">Fechamento</button></div>
+          <div id="accountingLancamentos" class="accounting-tab-content">
+            <div class="panel">
+              <div class="panel-title"><div><h2>Lançamentos contábeis</h2><p class="helper">Partidas dobradas com histórico, documento, centro de custo e competência.</p></div><button class="button primary small" data-action="new-accounting-entry">＋ Novo lançamento</button></div>
+              <div class="ledger-kpis"><div class="ledger-kpi"><small>Lançamentos no período</small><strong id="accountingEntryCount">184</strong></div><div class="ledger-kpi"><small>Total de débitos</small><strong>R$ 428.760,00</strong></div><div class="ledger-kpi"><small>Total de créditos</small><strong>R$ 428.760,00</strong></div><div class="ledger-kpi"><small>Situação</small><strong id="periodCloseStatus" class="period-open" style="font-size:12px">Período em aberto</strong></div></div>
+              <div class="table-wrap"><table><thead><tr><th>Data</th><th>Documento</th><th>Histórico</th><th>Débito</th><th>Crédito</th><th>Competência</th><th>Valor</th><th>Ação</th></tr></thead><tbody id="accountingEntriesTable"></tbody></table></div>
+              <div style="margin-top:14px"><span class="field-chip">Data do lançamento</span><span class="field-chip">Empresa / filial</span><span class="field-chip">Documento</span><span class="field-chip">Histórico</span><span class="field-chip">Conta débito</span><span class="field-chip">Conta crédito</span><span class="field-chip">Centro de custo</span><span class="field-chip">Competência</span><span class="field-chip">Forma de pagamento</span><span class="field-chip">Valor</span></div>
+            </div>
+          </div>
+          <div id="accountingPlano" class="accounting-tab-content hidden"><div class="panel"><div class="panel-title"><div><h2>Plano de contas</h2><p class="helper">Estrutura contábil usada pelos lançamentos e relatórios.</p></div><button class="button secondary small" data-action="new-account">＋ Nova conta</button></div><div class="table-wrap"><table><thead><tr><th>Código</th><th>Conta</th><th>Natureza</th><th>Tipo</th><th>Status</th></tr></thead><tbody><tr><td>1.01.01</td><td><strong>Caixa</strong></td><td>Devedora</td><td>Ativo</td><td><span class="status green">Ativa</span></td></tr><tr><td>1.01.02</td><td><strong>Bancos conta movimento</strong></td><td>Devedora</td><td>Ativo</td><td><span class="status green">Ativa</span></td></tr><tr><td>2.01.01</td><td><strong>Fornecedores</strong></td><td>Credora</td><td>Passivo</td><td><span class="status green">Ativa</span></td></tr><tr><td>3.01.01</td><td><strong>Receita de serviços</strong></td><td>Credora</td><td>Resultado</td><td><span class="status green">Ativa</span></td></tr><tr><td>4.01.01</td><td><strong>Despesas administrativas</strong></td><td>Devedora</td><td>Resultado</td><td><span class="status green">Ativa</span></td></tr></tbody></table></div></div></div>
+          <div id="accountingBalancete" class="accounting-tab-content hidden"><div class="grid-2 equal"><div class="panel"><div class="panel-title"><h2>Balancete demonstrativo</h2><button class="button small" data-action="download-report">Exportar PDF</button></div><div class="table-wrap"><table><thead><tr><th>Conta</th><th>Débitos</th><th>Créditos</th><th>Saldo</th></tr></thead><tbody><tr><td>Caixa</td><td>R$ 84.200,00</td><td>R$ 62.450,00</td><td>R$ 21.750,00</td></tr><tr><td>Bancos</td><td>R$ 214.600,00</td><td>R$ 198.340,00</td><td>R$ 16.260,00</td></tr><tr><td>Receita de serviços</td><td>R$ 0,00</td><td>R$ 428.760,00</td><td>R$ 428.760,00</td></tr><tr><td>Despesas administrativas</td><td>R$ 91.400,00</td><td>R$ 0,00</td><td>R$ 91.400,00</td></tr></tbody></table></div></div><div class="panel"><div class="panel-title"><h2>Indicadores</h2></div><div class="summary-card"><div class="summary-line"><span>Resultado do período</span><strong style="color:var(--teal)">R$ 337.360,00</strong></div><div class="summary-line"><span>Contas com divergência</span><span class="status yellow">2 revisar</span></div><div class="summary-line"><span>Partidas desequilibradas</span><span class="status green">Nenhuma</span></div><div class="summary-line"><span>Última conferência</span><span>Hoje, 10:42</span></div></div></div></div></div>
+          <div id="accountingConciliacao" class="accounting-tab-content hidden"><div class="grid-2 equal"><div class="panel"><div class="panel-title"><h2>Conciliação bancária</h2><span class="status yellow">12 pendências</span></div><div class="check-list"><div class="check ok"><span class="check-icon">✓</span><span>Extrato de Agosto importado</span></div><div class="check warn"><span class="check-icon">!</span><span>8 movimentos sem correspondência</span></div><div class="check warn"><span class="check-icon">!</span><span>4 lançamentos aguardando confirmação</span></div></div></div><div class="panel"><div class="panel-title"><h2>Regras de integração</h2></div><p class="helper">No sistema real, esta área permitirá relacionar operações fiscais a contas contábeis automaticamente, mantendo a possibilidade de ajuste manual e histórico da alteração.</p><button class="button secondary small" data-action="new-rule">＋ Criar regra de contabilização</button></div></div></div>
+          <div id="accountingFechamento" class="accounting-tab-content hidden"><div class="panel"><div class="panel-title"><div><h2>Fechamento contábil da competência</h2><p class="helper">O fechamento valida partidas, conciliação, documentos e saldos antes de bloquear o período.</p></div><button class="button primary" data-action="close-period">Encerrar competência</button></div><div class="closing-flow"><div class="closing-step"><div class="step-badge">1</div><strong>Lançamentos equilibrados</strong><small>Débitos e créditos devem fechar.</small><span class="status green" style="margin-top:9px">OK</span></div><div class="closing-step"><div class="step-badge">2</div><strong>Conciliação bancária</strong><small>Há itens que exigem conferência.</small><span class="status yellow" style="margin-top:9px">12 pendentes</span></div><div class="closing-step"><div class="step-badge">3</div><strong>Relatórios revisados</strong><small>Balancete e DRE disponíveis.</small><span class="status green" style="margin-top:9px">OK</span></div><div class="closing-step"><div class="step-badge">4</div><strong>Bloqueio do período</strong><small>Reabertura somente por usuário autorizado.</small><span id="accountingPeriodStatus" class="status period-open" style="margin-top:9px">Em aberto</span></div></div></div></div>
         </section>
 
         <section class="screen" id="screen-relatorios">
@@ -322,6 +375,9 @@
     const state = {
       screen: 'dashboard',
       wizardStep: 1,
+      fiscalTab: 'apurar',
+      accountingTab: 'lancamentos',
+      periodClosed: false,
       companies: [
         { id: 1, name: 'ABC Serviços Ltda.', cnpj: '12.345.678/0001-90', regime: 'Simples Nacional', activity: 'Serviços', competence: 'Aguardando apuração', status: 'Ativa' },
         { id: 2, name: 'Comercial Brasil ME', cnpj: '98.765.432/0001-11', regime: 'Simples Nacional', activity: 'Comércio', competence: 'Em dia', status: 'Ativa' },
@@ -342,6 +398,18 @@
         { name: 'Comprovante_DAS_072026.pdf', company: 'Comercial Brasil ME', period: '07/2026', type: 'Comprovante', imported: '02/08/2026', status: 'Conferido', tone: 'green' },
         { name: 'NF_009812.xml', company: 'Gourmet Alimentos Ltda.', period: '08/2026', type: 'NF-e', imported: '01/09/2026', status: 'Pendente', tone: 'yellow' }
       ],
+      fiscalTransactions: [
+        { date: '01/08/2026', document: 'NFSe 000184', operation: 'Serviço prestado', participant: 'Cliente ABC', nature: '5.933 / Serviços', value: 'R$ 12.500,00', status: 'Classificado', tone: 'green' },
+        { date: '02/08/2026', document: 'NFSe 000185', operation: 'Serviço prestado', participant: 'Cliente XPTO', nature: '5.933 / Serviços', value: 'R$ 9.000,00', status: 'Pendente', tone: 'yellow' },
+        { date: '05/08/2026', document: 'NF-e 009812', operation: 'Compra de material', participant: 'Fornecedor Sul', nature: '1.556 / Entrada', value: 'R$ 3.840,00', status: 'Classificado', tone: 'green' },
+        { date: '08/08/2026', document: 'Manual 00031', operation: 'Receita sem documento', participant: 'Cliente eventual', nature: 'A definir', value: 'R$ 7.000,00', status: 'Revisar', tone: 'yellow' }
+      ],
+      accountingEntries: [
+        { date: '01/08/2026', document: 'NFSe 000184', history: 'Reconhecimento de receita de serviços', debit: '1.01.02 Bancos', credit: '3.01.01 Receita de serviços', competence: '08/2026', value: 'R$ 12.500,00' },
+        { date: '02/08/2026', document: 'NFSe 000185', history: 'Receita de serviços a receber', debit: '1.02.01 Clientes', credit: '3.01.01 Receita de serviços', competence: '08/2026', value: 'R$ 9.000,00' },
+        { date: '05/08/2026', document: 'NF-e 009812', history: 'Compra de materiais para uso', debit: '4.01.02 Materiais', credit: '2.01.01 Fornecedores', competence: '08/2026', value: 'R$ 3.840,00' },
+        { date: '08/08/2026', document: 'REC 00031', history: 'Pagamento de despesa administrativa', debit: '4.01.01 Despesas administrativas', credit: '1.01.02 Bancos', competence: '08/2026', value: 'R$ 1.250,00' }
+      ],
       employees: [
         { name: 'Juliana Costa', initials: 'JC', company: 'Comercial Brasil ME', role: 'Assistente administrativa', payroll: 'Em dia' },
         { name: 'Marcos Lima', initials: 'ML', company: 'ABC Serviços Ltda.', role: 'Analista de suporte', payroll: 'Pendente' },
@@ -350,7 +418,7 @@
       ]
     };
 
-    const screenTitles = { dashboard: 'Visão geral', empresas: 'Empresas', apuracao: 'Fiscal', obrigacoes: 'Obrigações', documentos: 'Documentos', rh: 'Folha e RH', relatorios: 'Relatórios', configuracoes: 'Configurações' };
+    const screenTitles = { dashboard: 'Visão geral', empresas: 'Empresas', apuracao: 'Fiscal', contabil: 'Contábil', obrigacoes: 'Obrigações', documentos: 'Documentos', rh: 'Folha e RH', relatorios: 'Relatórios', configuracoes: 'Configurações' };
 
     function escapeHTML(value) {
       return String(value).replace(/[&<>"']/g, function(char) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[char]; });
@@ -366,6 +434,8 @@
       if (screen === 'obrigacoes') renderObligations();
       if (screen === 'documentos') renderDocuments();
       if (screen === 'rh') renderEmployees();
+      if (screen === 'apuracao') { renderFiscalTransactions(); setFiscalTab(state.fiscalTab); }
+      if (screen === 'contabil') { renderAccountingEntries(); setAccountingTab(state.accountingTab); }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -425,6 +495,56 @@
       }).join('');
     }
 
+
+    function setFiscalTab(tab) {
+      state.fiscalTab = tab;
+      document.querySelectorAll('[data-fiscal-tab]').forEach(function(item) { item.classList.toggle('active', item.dataset.fiscalTab === tab); });
+      document.querySelectorAll('.fiscal-tab-content').forEach(function(item) { item.classList.toggle('hidden', item.id !== 'fiscal' + tab.charAt(0).toUpperCase() + tab.slice(1)); });
+    }
+
+    function setAccountingTab(tab) {
+      state.accountingTab = tab;
+      document.querySelectorAll('[data-accounting-tab]').forEach(function(item) { item.classList.toggle('active', item.dataset.accountingTab === tab); });
+      document.querySelectorAll('.accounting-tab-content').forEach(function(item) { item.classList.toggle('hidden', item.id !== 'accounting' + tab.charAt(0).toUpperCase() + tab.slice(1)); });
+    }
+
+    function renderFiscalTransactions() {
+      const table = document.getElementById('fiscalTransactionsTable');
+      if (!table) return;
+      table.innerHTML = state.fiscalTransactions.map(function(item, index) {
+        return '<tr><td>' + item.date + '</td><td><strong>' + escapeHTML(item.document) + '</strong></td><td>' + escapeHTML(item.operation) + '</td><td>' + escapeHTML(item.participant) + '</td><td>' + escapeHTML(item.nature) + '</td><td><strong>' + escapeHTML(item.value) + '</strong></td><td><span class="status ' + item.tone + '">' + escapeHTML(item.status) + '</span></td><td><button class="action-link" data-action="fiscal-details" data-fiscal-index="' + index + '">Abrir</button></td></tr>';
+      }).join('');
+    }
+
+    function renderAccountingEntries() {
+      const table = document.getElementById('accountingEntriesTable');
+      if (table) {
+        table.innerHTML = state.accountingEntries.map(function(item, index) {
+          return '<tr><td>' + item.date + '</td><td><strong>' + escapeHTML(item.document) + '</strong></td><td>' + escapeHTML(item.history) + '</td><td>' + escapeHTML(item.debit) + '</td><td>' + escapeHTML(item.credit) + '</td><td>' + item.competence + '</td><td><strong>' + escapeHTML(item.value) + '</strong></td><td><button class="action-link" data-action="accounting-details" data-accounting-index="' + index + '">Abrir</button></td></tr>';
+        }).join('');
+      }
+      const count = document.getElementById('accountingEntryCount');
+      if (count) count.textContent = state.accountingEntries.length + ' +';
+      const statusText = state.periodClosed ? 'Período fechado' : 'Período em aberto';
+      const statusClass = state.periodClosed ? 'period-closed' : 'period-open';
+      ['periodCloseStatus','fiscalPeriodStatus','accountingPeriodStatus'].forEach(function(id) {
+        const element = document.getElementById(id);
+        if (element) { element.textContent = statusText; element.className = id === 'periodCloseStatus' ? statusClass : 'status ' + statusClass; }
+      });
+      document.querySelectorAll('[data-action="close-period"], [data-action="reopen-period"]').forEach(function(button) {
+        button.dataset.action = state.periodClosed ? 'reopen-period' : 'close-period';
+        button.textContent = state.periodClosed ? 'Reabrir competência' : 'Encerrar competência';
+      });
+    }
+
+    function newFiscalEntryModal() {
+      openModal('Novo lançamento fiscal', '<form id="fiscalEntryForm"><div class="form-grid"><div class="form-field"><label>Data do documento</label><input class="input" type="date" name="date" required value="2026-08-12"></div><div class="form-field"><label>Competência</label><input class="input" type="month" name="competence" required value="2026-08"></div><div class="form-field"><label>Tipo de operação</label><select class="select" name="operation"><option>Entrada</option><option>Saída</option><option>Serviço prestado</option><option>Serviço tomado</option><option>Receita sem documento</option></select></div><div class="form-field"><label>Empresa</label><select class="select" name="company"><option>ABC Serviços Ltda.</option><option>Comercial Brasil ME</option><option>Gourmet Alimentos Ltda.</option></select></div><div class="form-field"><label>Tipo e número do documento</label><input class="input" name="document" required placeholder="NFSe 000000"></div><div class="form-field"><label>Cliente ou fornecedor</label><input class="input" name="participant" required placeholder="Nome / razão social"></div><div class="form-field"><label>Valor da operação</label><input class="input" name="value" required placeholder="R$ 0,00"></div><div class="form-field"><label>CFOP / natureza</label><input class="input" name="nature" placeholder="5.933 / Serviços"></div><div class="form-field"><label>CST / CSOSN</label><input class="input" name="taxCode" placeholder="Código fiscal"></div><div class="form-field"><label>NCM / código de serviço</label><input class="input" name="itemCode" placeholder="Código"></div><div class="form-field"><label>Retenções</label><select class="select" name="withholding"><option>Não possui</option><option>Possui retenções</option><option>A conferir</option></select></div><div class="form-field"><label>Centro de custo</label><select class="select" name="costCenter"><option>Administrativo</option><option>Operacional</option><option>Comercial</option></select></div><div class="form-field full"><label>Observação do lançamento</label><textarea class="input" name="notes" rows="2" placeholder="Informações para a conferência fiscal..."></textarea></div></div></form>', '<button class="button" data-action="close-modal">Cancelar</button><button class="button primary" data-action="save-fiscal-entry">Salvar lançamento</button>');
+    }
+
+    function newAccountingEntryModal() {
+      openModal('Novo lançamento contábil', '<form id="accountingEntryForm"><div class="form-grid"><div class="form-field"><label>Data do lançamento</label><input class="input" type="date" name="date" required value="2026-08-12"></div><div class="form-field"><label>Competência</label><input class="input" type="month" name="competence" required value="2026-08"></div><div class="form-field full"><label>Empresa</label><select class="select" name="company"><option>ABC Serviços Ltda.</option><option>Comercial Brasil ME</option><option>Ribeiro Consultoria Ltda.</option></select></div><div class="form-field"><label>Documento / origem</label><input class="input" name="document" required placeholder="NF, recibo, extrato..."></div><div class="form-field"><label>Valor</label><input class="input" name="value" required placeholder="R$ 0,00"></div><div class="form-field full"><label>Histórico</label><input class="input" name="history" required placeholder="Descreva o fato contábil"></div><div class="form-field"><label>Conta débito</label><select class="select" name="debit"><option>1.01.02 Bancos</option><option>1.01.01 Caixa</option><option>1.02.01 Clientes</option><option>4.01.01 Despesas administrativas</option><option>4.01.02 Materiais</option></select></div><div class="form-field"><label>Conta crédito</label><select class="select" name="credit"><option>3.01.01 Receita de serviços</option><option>2.01.01 Fornecedores</option><option>1.01.02 Bancos</option><option>2.02.01 Obrigações a pagar</option></select></div><div class="form-field"><label>Centro de custo</label><select class="select" name="costCenter"><option>Administrativo</option><option>Operacional</option><option>Comercial</option></select></div><div class="form-field"><label>Forma de pagamento</label><select class="select" name="payment"><option>Transferência bancária</option><option>Pix</option><option>Boleto</option><option>Cartão</option><option>Não se aplica</option></select></div><div class="form-field full"><span class="helper">O sistema real deverá validar se débito e crédito estão preenchidos, manter o valor exato e impedir lançamento em competência encerrada sem autorização.</span></div></div></form>', '<button class="button" data-action="close-modal">Cancelar</button><button class="button primary" data-action="save-accounting-entry">Salvar lançamento</button>');
+    }
+
     function setWizardStep(step) {
       state.wizardStep = Math.max(1, Math.min(5, step));
       document.querySelectorAll('[data-wizard]').forEach(function(item) {
@@ -441,7 +561,7 @@
     function showCompany(id) {
       const item = state.companies.find(function(company) { return company.id === Number(id); });
       if (!item) return;
-      openModal('Perfil da empresa', '<div class="summary-card"><div class="summary-line"><span>Razão social</span><strong style="font-size:13px">' + item.name + '</strong></div><div class="summary-line"><span>CNPJ</span><span>' + item.cnpj + '</span></div><div class="summary-line"><span>Regime tributário</span><span class="status blue">' + item.regime + '</span></div><div class="summary-line"><span>Atividade principal</span><span>' + item.activity + '</span></div></div><div style="margin-top:18px"><div class="panel-title"><h2>Próximas ações</h2></div><div class="check-list"><div class="check ok"><span class="check-icon">✓</span><span>Cadastro cadastral atualizado</span></div><div class="check warn"><span class="check-icon">!</span><span>Apuração de Agosto aguardando conferência</span></div><div class="check ok"><span class="check-icon">✓</span><span>Documentos do mês recebidos parcialmente</span></div></div></div>', '<button class="button" data-action="close-modal">Fechar</button><button class="button primary" data-action="company-apuration">Abrir apuração</button>');
+      openModal('Perfil da empresa', '<div class="summary-card"><div class="summary-line"><span>Razão social</span><strong style="font-size:13px">' + item.name + '</strong></div><div class="summary-line"><span>CNPJ</span><span>' + item.cnpj + '</span></div><div class="summary-line"><span>Regime tributário</span><span class="status blue">' + item.regime + '</span></div><div class="summary-line"><span>Atividade principal</span><span>' + item.activity + '</span></div></div><div style="margin-top:18px"><div class="panel-title"><h2>Próximas ações</h2></div><div class="check-list"><div class="check ok"><span class="check-icon">✓</span><span>Cadastro cadastral atualizado</span></div><div class="check warn"><span class="check-icon">!</span><span>Apuração de Agosto aguardando conferência</span></div><div class="check ok"><span class="check-icon">✓</span><span>Documentos do mês recebidos parcialmente</span></div></div></div>', '<button class="button" data-action="close-modal">Fechar</button><button class="button" data-action="company-fiscal">Movimentos fiscais</button><button class="button" data-action="company-accounting">Contábil</button><button class="button primary" data-action="company-apuration">Abrir apuração</button>');
     }
 
     function newCompanyModal() {
@@ -461,6 +581,10 @@
     }
 
     document.addEventListener('click', function(event) {
+      const fiscalTab = event.target.closest('[data-fiscal-tab]');
+      if (fiscalTab) { setFiscalTab(fiscalTab.dataset.fiscalTab); return; }
+      const accountingTab = event.target.closest('[data-accounting-tab]');
+      if (accountingTab) { setAccountingTab(accountingTab.dataset.accountingTab); return; }
       const nav = event.target.closest('[data-screen]');
       if (nav) { event.preventDefault(); navigate(nav.dataset.screen); return; }
       const action = event.target.closest('[data-action]');
@@ -470,12 +594,31 @@
       if (type === 'toggle-notifications') document.getElementById('notificationPopover').classList.toggle('hidden');
       if (type === 'close-modal') closeModal();
       if (type === 'new-company') newCompanyModal();
+      if (type === 'new-fiscal-entry') newFiscalEntryModal();
+      if (type === 'new-accounting-entry') newAccountingEntryModal();
       if (type === 'new-employee') newEmployeeModal();
       if (type === 'import-xml') importXmlModal();
-      if (type === 'start-apuration' || type === 'company-apuration') { closeModal(); navigate('apuracao'); setWizardStep(1); }
+      if (type === 'start-apuration' || type === 'company-apuration') { closeModal(); navigate('apuracao'); setFiscalTab('apurar'); setWizardStep(1); }
+      if (type === 'company-fiscal') { closeModal(); navigate('apuracao'); setFiscalTab('lancamentos'); }
+      if (type === 'company-accounting') { closeModal(); navigate('contabil'); setAccountingTab('lancamentos'); }
       if (type === 'company-details') showCompany(action.dataset.companyId);
       if (type === 'wizard-next') { if (state.wizardStep < 5) setWizardStep(state.wizardStep + 1); else { toast('Demonstração concluída. O resultado foi salvo apenas nesta sessão.'); navigate('dashboard'); } }
       if (type === 'wizard-back') setWizardStep(state.wizardStep - 1);
+      if (type === 'save-fiscal-entry') {
+        const form = document.getElementById('fiscalEntryForm');
+        if (!form.reportValidity()) return;
+        const data = new FormData(form);
+        state.fiscalTransactions.unshift({ date: data.get('date').split('-').reverse().join('/'), document: data.get('document'), operation: data.get('operation'), participant: data.get('participant'), nature: data.get('nature') || 'A definir', value: data.get('value'), status: 'Pendente', tone: 'yellow' });
+        closeModal(); navigate('apuracao'); setFiscalTab('lancamentos'); renderFiscalTransactions(); toast('Lançamento fiscal adicionado para conferência.');
+      }
+      if (type === 'save-accounting-entry') {
+        const form = document.getElementById('accountingEntryForm');
+        if (!form.reportValidity()) return;
+        if (state.periodClosed) { toast('A competência está fechada. Reabra o período para lançar.'); return; }
+        const data = new FormData(form);
+        state.accountingEntries.unshift({ date: data.get('date').split('-').reverse().join('/'), document: data.get('document'), history: data.get('history'), debit: data.get('debit'), credit: data.get('credit'), competence: data.get('competence').replace('-', '/'), value: data.get('value') });
+        closeModal(); navigate('contabil'); setAccountingTab('lancamentos'); renderAccountingEntries(); toast('Lançamento contábil salvo e incluído no livro.');
+      }
       if (type === 'save-company') {
         const form = document.getElementById('newCompanyForm');
         if (!form.reportValidity()) return;
@@ -492,10 +635,25 @@
         closeModal(); navigate('rh'); toast('Colaborador cadastrado no protótipo.');
       }
       if (type === 'save-settings') toast('Preferências salvas apenas nesta sessão demonstrativa.');
+      if (type === 'close-period') openModal('Encerrar competência', '<p style="font-size:12px;line-height:1.6;color:var(--muted)">Ao encerrar Agosto/2026, o sistema bloqueará novos lançamentos comuns e exigirá reabertura autorizada para qualquer ajuste.</p><div class="check warn"><span class="check-icon">!</span><span>Existem 8 documentos fiscais e 12 conciliações aguardando conferência.</span></div>', '<button class="button" data-action="close-modal">Voltar</button><button class="button primary" data-action="confirm-close-period">Confirmar fechamento</button>');
+      if (type === 'confirm-close-period') { state.periodClosed = true; closeModal(); renderAccountingEntries(); toast('Competência encerrada na demonstração. Novos lançamentos foram bloqueados.'); }
+      if (type === 'reopen-period') { state.periodClosed = false; renderAccountingEntries(); toast('Competência reaberta na demonstração.'); }
+      if (type === 'new-account') toast('Cadastro de conta aberto na demonstração.');
+      if (type === 'new-rule') toast('Regra de contabilização criada na demonstração.');
       if (type === 'invite-user') toast('Convite demonstrativo criado.');
       if (type === 'new-obligation') toast('Lembrete demonstrativo criado.');
       if (type === 'obligation-details') openModal('Detalhes da obrigação', '<div class="summary-card"><div class="summary-line"><span>Status</span><span class="status yellow">Aguardando ação</span></div><div class="summary-line"><span>Checklist</span><span>3 de 5 itens concluídos</span></div><div class="summary-line"><span>Responsável</span><span>Equipe fiscal</span></div></div>', '<button class="button" data-action="close-modal">Fechar</button><button class="button primary" data-action="mark-obligation">Marcar como concluída</button>');
       if (type === 'mark-obligation') { closeModal(); toast('Obrigação marcada como concluída na demonstração.'); }
+      if (type === 'fiscal-details') {
+        const item = state.fiscalTransactions[Number(action.dataset.fiscalIndex)];
+        if (item) openModal('Detalhes do lançamento fiscal', '<div class="summary-card"><div class="summary-line"><span>Documento</span><strong style="font-size:13px">' + item.document + '</strong></div><div class="summary-line"><span>Operação</span><span>' + item.operation + '</span></div><div class="summary-line"><span>Participante</span><span>' + item.participant + '</span></div><div class="summary-line"><span>Natureza</span><span>' + item.nature + '</span></div><div class="summary-line"><span>Status</span><span class="status ' + item.tone + '">' + item.status + '</span></div></div>', '<button class="button" data-action="close-modal">Fechar</button><button class="button primary" data-action="classify-fiscal">Classificar</button>');
+      }
+      if (type === 'classify-fiscal') { closeModal(); toast('Lançamento fiscal classificado na demonstração.'); }
+      if (type === 'accounting-details') {
+        const item = state.accountingEntries[Number(action.dataset.accountingIndex)];
+        if (item) openModal('Detalhes do lançamento contábil', '<div class="summary-card"><div class="summary-line"><span>Histórico</span><strong style="font-size:13px">' + item.history + '</strong></div><div class="summary-line"><span>Débito</span><span>' + item.debit + '</span></div><div class="summary-line"><span>Crédito</span><span>' + item.credit + '</span></div><div class="summary-line"><span>Competência</span><span>' + item.competence + '</span></div><div class="summary-line"><span>Valor</span><strong>' + item.value + '</strong></div></div>', '<button class="button" data-action="close-modal">Fechar</button><button class="button primary" data-action="edit-accounting">Editar</button>');
+      }
+      if (type === 'edit-accounting') { closeModal(); toast('Edição demonstrativa disponível antes do fechamento.'); }
       if (type === 'document-details') openModal('Detalhes do documento', '<div class="summary-card"><div class="summary-line"><span>Arquivo</span><strong style="font-size:12px">Documento fiscal selecionado</strong></div><div class="summary-line"><span>Validação</span><span class="status green">Estrutura válida</span></div><div class="summary-line"><span>Classificação</span><span class="status yellow">Pendente</span></div></div>', '<button class="button" data-action="close-modal">Fechar</button><button class="button primary" data-action="classify-document">Classificar</button>');
       if (type === 'classify-document') { closeModal(); toast('Documento classificado na demonstração.'); }
       if (type === 'employee-details') openModal('Ficha do colaborador', '<div class="summary-card"><div class="summary-line"><span>Colaborador</span><strong style="font-size:13px">Colaborador selecionado</strong></div><div class="summary-line"><span>Competência</span><span>Agosto/2026</span></div><div class="summary-line"><span>Folha</span><span class="status blue">Em conferência</span></div><div class="summary-line"><span>Eventos</span><span>5 lançamentos</span></div></div>', '<button class="button" data-action="close-modal">Fechar</button><button class="button primary" data-action="employee-payroll">Abrir folha</button>');
@@ -520,6 +678,10 @@
     renderObligations();
     renderDocuments();
     renderEmployees();
+    renderFiscalTransactions();
+    renderAccountingEntries();
+    setFiscalTab('apurar');
+    setAccountingTab('lancamentos');
     setWizardStep(1);
   </script>
 </body>
