@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contábil360 — Protótipo navegável</title>
+  <style>
+    :root {
+      --navy: #102640;
+      --navy-2: #17395d;
+      --blue: #1e78d7;
+      --teal: #08a59a;
+      --teal-soft: #dff8f3;
+      --bg: #f5f7fb;
+      --surface: #fff;
+      --line: #e5eaf1;
+      --text: #172338;
+      --muted: #6f7d91;
+      --success: #0b9a6d;
+      --warning: #d58b00;
+      --danger: #df4b57;
+      --shadow: 0 12px 28px rgba(16, 38, 64, .08);
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--text); background: var(--bg); }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .app-shell { min-height: 100vh; display: flex; }
+    .sidebar { width: 246px; flex: 0 0 246px; background: linear-gradient(180deg, #102640 0%, #0c1f35 100%); color: #d9e5f2; padding: 22px 14px; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; z-index: 20; }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 0 12px 28px; }
+    .brand-mark { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; background: linear-gradient(135deg, #16c8b7, #1680d8); color: #fff; font-weight: 900; }
+    .brand strong { font-size: 19px; color: #fff; letter-spacing: -.5px; }
+    .brand strong span { color: #2ed1c0; }
+    .nav-label { padding: 14px 12px 8px; text-transform: uppercase; font-size: 10px; letter-spacing: 1.2px; color: #7f9ab7; font-weight: 800; }
+    .nav-item { width: 100%; border: 0; color: #cad9e8; background: transparent; display: flex; align-items: center; gap: 11px; padding: 11px 12px; border-radius: 11px; text-align: left; margin: 2px 0; font-weight: 600; font-size: 13px; }
+    .nav-item:hover, .nav-item.active { background: rgba(50, 170, 191, .18); color: #fff; }
+    .nav-item.active { box-shadow: inset 3px 0 var(--teal); }
+    .nav-icon { width: 20px; text-align: center; font-size: 17px; }
+    .sidebar-bottom { margin-top: auto; padding: 12px; border-top: 1px solid rgba(255,255,255,.1); }
+    .demo-user { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+    .avatar { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: #d8eff0; color: #0c6672; font-weight: 800; }
+    .main { min-width: 0; flex: 1; }
+    .topbar { height: 72px; background: rgba(255,255,255,.96); border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 18px; padding: 0 30px; position: sticky; top: 0; z-index: 12; }
+    .menu-toggle { display: none; border: 0; background: transparent; font-size: 23px; color: var(--navy); }
+    .context { min-width: 240px; }
+    .context .eyebrow { font-size: 11px; color: var(--muted); }
+    .context strong { display: block; font-size: 15px; margin-top: 2px; }
+    .period-select { margin-left: auto; display: flex; align-items: center; gap: 9px; border: 1px solid var(--line); border-radius: 10px; padding: 9px 13px; background: #fff; font-size: 12px; color: var(--text); }
+    .top-action { position: relative; border: 0; background: transparent; font-size: 20px; color: var(--navy); padding: 8px; }
+    .notification-dot { position: absolute; top: 2px; right: 0; min-width: 17px; height: 17px; border-radius: 99px; background: var(--danger); color: #fff; font-size: 10px; display: grid; place-items: center; font-weight: 800; }
+    .top-user { display: flex; align-items: center; gap: 9px; padding-left: 12px; border-left: 1px solid var(--line); }
+    .top-user small { display: block; color: var(--muted); font-size: 10px; }
+    .top-user strong { display: block; font-size: 12px; }
+    .content { padding: 28px 30px 46px; max-width: 1600px; margin: 0 auto; }
+    .demo-banner { background: #fff8e7; border: 1px solid #f4deb0; color: #805c13; border-radius: 12px; padding: 11px 14px; font-size: 12px; margin-bottom: 22px; display: flex; gap: 8px; align-items: center; }
+    .screen { display: none; animation: fade .18s ease; }
+    .screen.active { display: block; }
+    @keyframes fade { from { opacity: .35; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+    .page-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 22px; }
+    .page-heading h1 { margin: 0; font-size: 27px; letter-spacing: -.7px; }
+    .page-heading p { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+    .button { border: 1px solid var(--line); border-radius: 9px; padding: 10px 14px; background: #fff; color: var(--text); font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; gap: 8px; }
+    .button:hover { border-color: #b7c8da; }
+    .button.primary { border-color: var(--blue); background: var(--blue); color: #fff; box-shadow: 0 5px 12px rgba(30,120,215,.18); }
+    .button.secondary { border-color: #ccece7; background: var(--teal-soft); color: #08776d; }
+    .button.danger { color: var(--danger); }
+    .button.small { padding: 7px 10px; font-size: 11px; }
+    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 16px; }
+    .metric { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 17px; min-width: 0; }
+    .metric-top { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 12px; font-weight: 700; }
+    .metric-icon { width: 37px; height: 37px; border-radius: 12px; display: grid; place-items: center; font-size: 18px; }
+    .metric:nth-child(1) .metric-icon { background: #dff8f3; color: #099d8f; }
+    .metric:nth-child(2) .metric-icon { background: #fff1cf; color: #c67a00; }
+    .metric:nth-child(3) .metric-icon { background: #e2efff; color: #2075ce; }
+    .metric:nth-child(4) .metric-icon { background: #eee8ff; color: #7655d3; }
+    .metric-value { margin: 14px 0 5px; font-weight: 850; font-size: 28px; letter-spacing: -1px; }
+    .metric-note { font-size: 11px; color: var(--muted); }
+    .up { color: var(--success); font-weight: 800; }
+    .down { color: var(--danger); font-weight: 800; }
+    .grid-2 { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .grid-2.equal { grid-template-columns: 1fr 1fr; }
+    .grid-3 { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 16px; }
+    .panel { background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: var(--radius); padding: 18px; min-width: 0; }
+    .panel-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 15px; }
+    .panel-title h2 { margin: 0; font-size: 15px; letter-spacing: -.2px; }
+    .panel-title a { color: var(--blue); font-size: 11px; font-weight: 800; cursor: pointer; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { text-align: left; color: #74839a; font-size: 10px; text-transform: uppercase; letter-spacing: .55px; padding: 9px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    td { padding: 12px 8px; border-bottom: 1px solid #eef1f5; vertical-align: middle; white-space: nowrap; }
+    tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: #f9fbfd; }
+    .status { display: inline-flex; align-items: center; gap: 5px; border-radius: 99px; padding: 5px 8px; font-size: 10px; font-weight: 800; }
+    .status.green { color: #087a5e; background: #dcf7ed; }
+    .status.yellow { color: #9d6a00; background: #fff0c9; }
+    .status.blue { color: #2169a9; background: #e4f0fc; }
+    .status.gray { color: #637286; background: #edf1f5; }
+    .status.red { color: #b43d48; background: #fde8eb; }
+    .obligation-row { display: flex; gap: 11px; align-items: center; padding: 10px 0; border-bottom: 1px solid #eef1f5; }
+    .obligation-row:last-child { border-bottom: 0; }
+    .date-box { flex: 0 0 43px; border-radius: 10px; text-align: center; background: #eff5fb; color: var(--blue); padding: 7px 3px; }
+    .date-box strong { display: block; font-size: 16px; line-height: 15px; }
+    .date-box small { font-size: 9px; text-transform: uppercase; font-weight: 800; }
+    .obligation-info { min-width: 0; flex: 1; }
+    .obligation-info strong { display: block; font-size: 12px; }
+    .obligation-info small { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .alert { display: flex; gap: 10px; padding: 11px 0; border-bottom: 1px solid #eef1f5; }
+    .alert:last-child { border-bottom: 0; }
+    .alert-bullet { width: 28px; height: 28px; border-radius: 9px; flex: 0 0 28px; display: grid; place-items: center; background: #fff0f0; color: var(--danger); }
+    .alert.warn .alert-bullet { background: #fff5df; color: var(--warning); }
+    .alert.info .alert-bullet { background: #e6f2ff; color: var(--blue); }
+    .alert strong { display: block; font-size: 11px; }
+    .alert small { display: block; color: var(--muted); line-height: 1.4; margin-top: 3px; font-size: 10px; }
+    .chart-box { min-height: 205px; display: flex; align-items: flex-end; gap: 16px; padding: 20px 7px 8px; border-top: 1px solid #f0f2f6; }
+    .bar-item { flex: 1; min-width: 22px; display: flex; flex-direction: column; align-items: center; gap: 7px; height: 160px; justify-content: flex-end; }
+    .bar { width: 100%; max-width: 38px; border-radius: 8px 8px 3px 3px; background: linear-gradient(180deg, #1cbcae, #8adfd7); min-height: 12px; }
+    .bar.highlight { background: linear-gradient(180deg, #1d7ed4, #82baf0); }
+    .bar-item small { font-size: 10px; color: var(--muted); }
+    .search-row { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+    .input, .select { border: 1px solid var(--line); border-radius: 9px; padding: 10px 11px; background: #fff; color: var(--text); font-size: 12px; outline: none; }
+    .input:focus, .select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(30,120,215,.1); }
+    .search { flex: 1; min-width: 200px; }
+    .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .company-name { font-weight: 800; color: var(--navy); }
+    .company-meta { display: block; color: var(--muted); font-size: 10px; margin-top: 3px; }
+    .action-link { color: var(--blue); font-weight: 800; font-size: 11px; cursor: pointer; border: 0; background: none; padding: 2px; }
+    .stepper { display: flex; gap: 0; margin-bottom: 20px; overflow-x: auto; padding-bottom: 3px; }
+    .step { flex: 1; min-width: 120px; position: relative; display: flex; align-items: center; gap: 8px; color: #9aa6b6; font-size: 11px; font-weight: 800; }
+    .step:not(:last-child):after { content: ""; height: 1px; background: #dbe4ed; flex: 1; margin: 0 10px; }
+    .step-number { width: 27px; height: 27px; border-radius: 50%; display: grid; place-items: center; border: 1px solid #cad5e0; background: #fff; flex: 0 0 27px; }
+    .step.active { color: var(--blue); }
+    .step.active .step-number { color: #fff; background: var(--blue); border-color: var(--blue); }
+    .step.done { color: var(--success); }
+    .step.done .step-number { color: #fff; background: var(--success); border-color: var(--success); }
+    .wizard-content { min-height: 330px; }
+    .wizard-panel { display: none; }
+    .wizard-panel.active { display: block; }
+    .wizard-title { margin: 0 0 5px; font-size: 17px; }
+    .wizard-subtitle { margin: 0 0 18px; color: var(--muted); font-size: 12px; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .form-field { display: flex; flex-direction: column; gap: 6px; }
+    .form-field.full { grid-column: 1 / -1; }
+    .form-field label { font-size: 11px; color: #647389; font-weight: 800; }
+    .helper { font-size: 10px; color: var(--muted); line-height: 1.4; }
+    .summary-card { background: #f7fafc; border: 1px solid var(--line); padding: 14px; border-radius: 12px; }
+    .summary-card .summary-line { display: flex; justify-content: space-between; padding: 8px 0; font-size: 12px; border-bottom: 1px solid #e8eef3; }
+    .summary-card .summary-line:last-child { border-bottom: 0; }
+    .summary-card strong { font-size: 17px; }
+    .wizard-footer { border-top: 1px solid var(--line); margin-top: 20px; padding-top: 14px; display: flex; justify-content: space-between; gap: 10px; }
+    .check-list { display: grid; gap: 9px; }
+    .check { display: flex; align-items: center; gap: 9px; padding: 10px; border: 1px solid var(--line); border-radius: 10px; font-size: 12px; }
+    .check.ok { border-color: #cbeee3; background: #f3fcf9; }
+    .check.warn { border-color: #f2dfae; background: #fffaf0; }
+    .check-icon { width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; background: var(--teal-soft); color: var(--success); font-weight: 900; }
+    .check.warn .check-icon { background: #ffedc4; color: var(--warning); }
+    .empty { padding: 30px 15px; text-align: center; color: var(--muted); font-size: 12px; }
+    .upload-zone { border: 1px dashed #aac3d8; background: #f8fbfe; border-radius: 13px; padding: 26px; text-align: center; margin-bottom: 18px; }
+    .upload-zone strong { display: block; margin: 8px 0 4px; font-size: 13px; }
+    .upload-zone small { color: var(--muted); font-size: 11px; }
+    .employee-card { display: flex; align-items: center; gap: 11px; }
+    .employee-avatar { width: 33px; height: 33px; border-radius: 50%; background: #e8f2ff; color: #2a71bc; display: grid; place-items: center; font-weight: 800; font-size: 11px; }
+    .employee-card strong { display: block; font-size: 12px; }
+    .employee-card small { color: var(--muted); display: block; margin-top: 2px; font-size: 10px; }
+    .report-card { padding: 17px; border: 1px solid var(--line); border-radius: 13px; background: #fff; display: flex; align-items: center; gap: 12px; }
+    .report-icon { width: 40px; height: 40px; display: grid; place-items: center; background: #eef6ff; color: var(--blue); border-radius: 11px; font-size: 19px; }
+    .report-card strong { display: block; font-size: 12px; }
+    .report-card small { display: block; color: var(--muted); margin-top: 4px; font-size: 10px; }
+    .settings-section { margin-bottom: 20px; }
+    .settings-section h3 { font-size: 14px; margin: 0 0 12px; }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 50; background: rgba(10,27,47,.45); display: grid; place-items: center; padding: 18px; }
+    .modal { background: #fff; width: min(680px, 100%); max-height: 90vh; overflow: auto; border-radius: 18px; box-shadow: 0 24px 60px rgba(5,25,45,.24); }
+    .modal-head { display: flex; justify-content: space-between; gap: 16px; align-items: center; padding: 20px 22px; border-bottom: 1px solid var(--line); }
+    .modal-head h2 { margin: 0; font-size: 17px; }
+    .modal-close { border: 0; background: transparent; font-size: 22px; color: var(--muted); }
+    .modal-body { padding: 22px; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 15px 22px; border-top: 1px solid var(--line); }
+    .toast-root { position: fixed; right: 22px; bottom: 22px; z-index: 80; display: grid; gap: 8px; }
+    .toast { color: #fff; background: var(--navy); box-shadow: var(--shadow); border-radius: 10px; padding: 12px 15px; font-size: 12px; max-width: 310px; animation: toast .2s ease; }
+    @keyframes toast { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .notification-popover { position: fixed; right: 170px; top: 62px; width: 330px; background: #fff; border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: 14px; padding: 14px; z-index: 30; }
+    .notification-popover h3 { margin: 0 0 10px; font-size: 13px; }
+    .notification-item { padding: 10px 0; border-bottom: 1px solid #eef1f5; font-size: 11px; }
+    .notification-item:last-child { border-bottom: 0; }
+    .notification-item small { display: block; color: var(--muted); margin-top: 3px; }
+    .hidden { display: none !important; }
+    @media (max-width: 1120px) {
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-2, .grid-2.equal, .grid-3 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 860px) {
+      .sidebar { position: fixed; left: -270px; transition: left .2s ease; box-shadow: 12px 0 25px rgba(0,0,0,.13); }
+      .sidebar.open { left: 0; }
+      .menu-toggle { display: block; }
+      .topbar { padding: 0 16px; }
+      .content { padding: 22px 16px 34px; }
+      .context { min-width: 0; }
+      .context .eyebrow { display: none; }
+      .top-user > div:not(.avatar) { display: none; }
+      .period-select { padding: 8px; }
+    }
+    @media (max-width: 560px) {
+      .metrics { grid-template-columns: 1fr; }
+      .page-heading { flex-direction: column; }
+      .page-heading .button { width: 100%; justify-content: center; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-field.full { grid-column: auto; }
+      .topbar { gap: 8px; }
+      .period-select { margin-left: auto; font-size: 10px; }
+      .top-action { font-size: 17px; }
+      .step { min-width: 105px; font-size: 10px; }
+      .step:not(:last-child):after { margin: 0 5px; }
+      .notification-popover { right: 12px; top: 64px; width: calc(100vw - 24px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><div class="brand-mark">C</div><strong>Contábil<span>360</span></strong></div>
+      <div class="nav-label">Operação</div>
+      <button class="nav-item active" data-screen="dashboard"><span class="nav-icon">⌂</span>Visão geral</button>
+      <button class="nav-item" data-screen="empresas"><span class="nav-icon">▦</span>Empresas</button>
+      <button class="nav-item" data-screen="apuracao"><span class="nav-icon">▣</span>Fiscal</button>
+      <button class="nav-item" data-screen="relatorios"><span class="nav-icon">▤</span>Contábil</button>
+      <button class="nav-item" data-screen="rh"><span class="nav-icon">♙</span>Folha e RH</button>
+      <button class="nav-item" data-screen="obrigacoes"><span class="nav-icon">✓</span>Obrigações</button>
+      <button class="nav-item" data-screen="documentos"><span class="nav-icon">▱</span>Documentos</button>
+      <button class="nav-item" data-screen="relatorios"><span class="nav-icon">▥</span>Relatórios</button>
+      <div class="nav-label">Administração</div>
+      <button class="nav-item" data-screen="configuracoes"><span class="nav-icon">⚙</span>Configurações</button>
+      <div class="sidebar-bottom">
+        <div class="demo-user"><div class="avatar">CA</div><div><strong style="color:#fff">Carlos Alves</strong><br><span style="color:#8da5bd">Administrador</span></div></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="menu-toggle" data-action="toggle-sidebar" aria-label="Abrir menu">☰</button>
+        <div class="context"><div class="eyebrow">Escritório selecionado</div><strong>Escritório Contábil Alves</strong></div>
+        <div class="period-select">▣ <span>Período: <strong>Agosto/2026</strong></span>⌄</div>
+        <button class="top-action" data-action="toggle-notifications" aria-label="Notificações">♧<span class="notification-dot">3</span></button>
+        <div class="top-user"><div><small>Administrador</small><strong>Carlos Alves</strong></div><div class="avatar">CA</div></div>
+      </header>
+
+      <div class="content">
+        <div class="demo-banner">⚠ <span><strong>Modo demonstração:</strong> dados fictícios para testar a usabilidade. Nenhum cálculo ou transmissão oficial será realizado.</span></div>
+
+        <section class="screen active" id="screen-dashboard">
+          <div class="page-heading"><div><h1>Olá, Carlos!</h1><p>Este é o panorama do seu escritório em Agosto de 2026.</p></div><button class="button primary" data-action="start-apuration">＋ Iniciar apuração</button></div>
+          <div class="metrics">
+            <div class="metric"><div class="metric-top"><span>Empresas ativas</span><span class="metric-icon">▦</span></div><div class="metric-value">32</div><div class="metric-note"><span class="up">↗ 3%</span> em relação ao mês anterior</div></div>
+            <div class="metric"><div class="metric-top"><span>Apurações pendentes</span><span class="metric-icon">▣</span></div><div class="metric-value">7</div><div class="metric-note"><span class="down">↗ 2</span> aguardando conferência</div></div>
+            <div class="metric"><div class="metric-top"><span>DAS próximos do vencimento</span><span class="metric-icon">◷</span></div><div class="metric-value">4</div><div class="metric-note"><span class="down">↗ 1</span> nos próximos 7 dias</div></div>
+            <div class="metric"><div class="metric-top"><span>Documentos pendentes</span><span class="metric-icon">▤</span></div><div class="metric-value">12</div><div class="metric-note"><span class="up">↘ 20%</span> em relação ao mês anterior</div></div>
+          </div>
+          <div class="grid-2">
+            <div class="panel"><div class="panel-title"><h2>Agenda de obrigações</h2><a data-screen="obrigacoes">Ver todas</a></div><div id="dashboard-obligations"></div></div>
+            <div class="panel"><div class="panel-title"><h2>Alertas fiscais</h2><a data-screen="obrigacoes">Ver todos</a></div><div class="alert"><div class="alert-bullet">!</div><div><strong>Receita sem classificação</strong><small>3 lançamentos aguardando classificação na empresa ABC Serviços Ltda.</small></div></div><div class="alert warn"><div class="alert-bullet">▣</div><div><strong>XML pendente</strong><small>12 notas fiscais aguardando importação ou conferência.</small></div></div><div class="alert info"><div class="alert-bullet">i</div><div><strong>Diferença de tributação</strong><small>Existe divergência entre a receita informada e os documentos fiscais.</small></div></div></div>
+          </div>
+          <div class="grid-2 equal">
+            <div class="panel"><div class="panel-title"><h2>Receita bruta das empresas</h2><select class="select" style="padding:6px 8px;font-size:10px"><option>Últimos 6 meses</option></select></div><div style="font-size:24px;font-weight:850;margin:2px 0 0">R$ 1.248.320,00 <span class="status green" style="vertical-align:middle">↗ 12%</span></div><div class="chart-box"><div class="bar-item"><div class="bar" style="height:51%"></div><small>Mar</small></div><div class="bar-item"><div class="bar" style="height:59%"></div><small>Abr</small></div><div class="bar-item"><div class="bar" style="height:72%"></div><small>Mai</small></div><div class="bar-item"><div class="bar" style="height:79%"></div><small>Jun</small></div><div class="bar-item"><div class="bar" style="height:88%"></div><small>Jul</small></div><div class="bar-item"><div class="bar highlight" style="height:100%"></div><small>Ago</small></div></div></div>
+            <div class="panel"><div class="panel-title"><h2>Empresas recentes</h2><a data-screen="empresas">Ver todas</a></div><div class="table-wrap"><table><thead><tr><th>Empresa</th><th>Regime</th><th>Status</th></tr></thead><tbody><tr><td><span class="company-name">ABC Serviços Ltda.</span><span class="company-meta">12.345.678/0001-90</span></td><td>Simples</td><td><span class="status green">Ativa</span></td></tr><tr><td><span class="company-name">Comercial Brasil ME</span><span class="company-meta">98.765.432/0001-11</span></td><td>Simples</td><td><span class="status green">Ativa</span></td></tr><tr><td><span class="company-name">Tech Soluções Ltda.</span><span class="company-meta">56.789.123/0001-44</span></td><td>Presumido</td><td><span class="status yellow">Revisar</span></td></tr><tr><td><span class="company-name">Ribeiro Consultoria</span><span class="company-meta">11.222.333/0001-55</span></td><td>Simples</td><td><span class="status green">Ativa</span></td></tr></tbody></table></div></div>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-empresas">
+          <div class="page-heading"><div><h1>Empresas</h1><p>Cadastre, consulte e acompanhe os clientes do escritório.</p></div><button class="button primary" data-action="new-company">＋ Nova empresa</button></div>
+          <div class="panel"><div class="search-row"><input id="companySearch" class="input search" placeholder="Buscar por nome ou CNPJ..."><select id="companyRegime" class="select"><option value="">Todos os regimes</option><option>Simples Nacional</option><option>Lucro Presumido</option><option>Lucro Real</option></select><select id="companyStatus" class="select"><option value="">Todos os status</option><option>Ativa</option><option>Revisar</option></select></div><div class="table-wrap"><table><thead><tr><th>Empresa</th><th>CNPJ</th><th>Regime</th><th>Atividade</th><th>Competência</th><th>Status</th><th>Ação</th></tr></thead><tbody id="companiesTable"></tbody></table></div></div>
+        </section>
+
+        <section class="screen" id="screen-apuracao">
+          <div class="page-heading"><div><h1>Apuração fiscal</h1><p>Assistente demonstrativo para apuração mensal do Simples Nacional.</p></div><button class="button secondary" data-action="import-xml">⇧ Importar XMLs</button></div>
+          <div class="panel"><div class="stepper" id="wizardStepper"><div class="step active" data-wizard="1"><span class="step-number">1</span>Empresa</div><div class="step" data-wizard="2"><span class="step-number">2</span>Receitas</div><div class="step" data-wizard="3"><span class="step-number">3</span>Classificação</div><div class="step" data-wizard="4"><span class="step-number">4</span>Conferência</div><div class="step" data-wizard="5"><span class="step-number">5</span>Resultado</div></div>
+            <div class="wizard-content">
+              <div class="wizard-panel active" data-wizard-panel="1"><h2 class="wizard-title">Selecione a empresa</h2><p class="wizard-subtitle">Comece escolhendo a empresa e o período que será apurado.</p><div class="form-grid"><div class="form-field"><label>Empresa</label><select class="select" id="wizardCompany"><option>ABC Serviços Ltda. — 12.345.678/0001-90</option><option>Comercial Brasil ME — 98.765.432/0001-11</option><option>Ribeiro Consultoria — 11.222.333/0001-55</option></select></div><div class="form-field"><label>Período de apuração</label><select class="select"><option>Agosto/2026</option><option>Julho/2026</option><option>Junho/2026</option></select></div><div class="form-field"><label>Regime de reconhecimento</label><select class="select"><option>Competência</option><option>Caixa</option></select><span class="helper">No sistema real, esta escolha ficaria bloqueada conforme a opção anual da empresa.</span></div><div class="form-field"><label>Responsável pela conferência</label><select class="select"><option>Carlos Alves</option><option>Equipe fiscal</option></select></div></div></div>
+              <div class="wizard-panel" data-wizard-panel="2"><h2 class="wizard-title">Informe ou confira as receitas</h2><p class="wizard-subtitle">Os dados podem vir de XMLs importados ou de lançamento manual.</p><div class="form-grid"><div class="form-field"><label>Receita de serviços no mês</label><input class="input" id="revenueServices" value="28500,00"></div><div class="form-field"><label>Receita de comércio no mês</label><input class="input" value="0,00"></div><div class="form-field"><label>Receita recebida no mês</label><input class="input" value="26700,00"></div><div class="form-field"><label>Receita do mercado externo</label><input class="input" value="0,00"></div><div class="form-field full"><label>Observações</label><textarea class="input" rows="3" placeholder="Anote informações para a conferência..."></textarea></div></div></div>
+              <div class="wizard-panel" data-wizard-panel="3"><h2 class="wizard-title">Classifique as receitas</h2><p class="wizard-subtitle">A classificação correta alimenta o cálculo e evita divergências.</p><div class="table-wrap"><table><thead><tr><th>Origem</th><th>Valor</th><th>Atividade</th><th>Anexo demonstrativo</th><th>Retenção</th></tr></thead><tbody><tr><td>NFSe 000184</td><td>R$ 12.500,00</td><td><select class="select"><option>Consultoria</option><option>Serviços gerais</option></select></td><td><select class="select"><option>Anexo III</option><option>Anexo V</option></select></td><td><select class="select"><option>Não</option><option>Sim</option></select></td></tr><tr><td>NFSe 000185</td><td>R$ 9.000,00</td><td><select class="select"><option>Consultoria</option><option>Serviços gerais</option></select></td><td><select class="select"><option>Anexo III</option><option>Anexo V</option></select></td><td><select class="select"><option>Não</option><option>Sim</option></select></td></tr><tr><td>Lançamento manual</td><td>R$ 7.000,00</td><td><select class="select"><option>Serviços gerais</option><option>Consultoria</option></select></td><td><select class="select"><option>Anexo III</option><option>Anexo V</option></select></td><td><select class="select"><option>Não</option><option>Sim</option></select></td></tr></tbody></table></div></div>
+              <div class="wizard-panel" data-wizard-panel="4"><h2 class="wizard-title">Conferência antes do cálculo</h2><p class="wizard-subtitle">Revise os avisos antes de gerar o resultado demonstrativo.</p><div class="grid-2 equal"><div class="check-list"><div class="check ok"><span class="check-icon">✓</span><span>Empresa optante pelo Simples Nacional</span></div><div class="check ok"><span class="check-icon">✓</span><span>Período ainda não encerrado</span></div><div class="check warn"><span class="check-icon">!</span><span>1 lançamento manual sem documento anexado</span></div><div class="check ok"><span class="check-icon">✓</span><span>Receita classificada por atividade</span></div></div><div class="summary-card"><div class="summary-line"><span>Receita informada no mês</span><strong>R$ 28.500,00</strong></div><div class="summary-line"><span>Receita acumulada — RBT12</span><strong>R$ 342.000,00</strong></div><div class="summary-line"><span>Regime</span><strong style="font-size:13px">Competência</strong></div><div class="summary-line"><span>Situação</span><span class="status yellow">Aguardando revisão</span></div></div></div></div>
+              <div class="wizard-panel" data-wizard-panel="5"><h2 class="wizard-title">Resultado demonstrativo</h2><p class="wizard-subtitle">Este resultado é fictício e serve apenas para demonstrar a experiência de uso.</p><div class="grid-2 equal"><div class="summary-card"><div class="summary-line"><span>Receita bruta do período</span><strong>R$ 28.500,00</strong></div><div class="summary-line"><span>RBT12</span><strong>R$ 342.000,00</strong></div><div class="summary-line"><span>Alíquota efetiva simulada</span><strong>6,00%</strong></div><div class="summary-line"><span>DAS demonstrativo</span><strong style="color:var(--teal)">R$ 1.710,00</strong></div></div><div class="check-list"><div class="check ok"><span class="check-icon">✓</span><span>Memória de cálculo disponível</span></div><div class="check ok"><span class="check-icon">✓</span><span>Relatório pronto para revisão</span></div><div class="check warn"><span class="check-icon">!</span><span>Transmissão oficial desabilitada no protótipo</span></div></div></div></div>
+            </div>
+            <div class="wizard-footer"><button class="button" id="wizardBack" data-action="wizard-back">← Voltar</button><button class="button primary" id="wizardNext" data-action="wizard-next">Continuar →</button></div>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-obrigacoes">
+          <div class="page-heading"><div><h1>Obrigações</h1><p>Acompanhe prazos, responsáveis e situação das entregas.</p></div><button class="button primary" data-action="new-obligation">＋ Criar lembrete</button></div>
+          <div class="metrics"><div class="metric"><div class="metric-top"><span>Em dia</span><span class="metric-icon">✓</span></div><div class="metric-value">18</div><div class="metric-note">obrigações acompanhadas</div></div><div class="metric"><div class="metric-top"><span>Pendentes</span><span class="metric-icon">◷</span></div><div class="metric-value">7</div><div class="metric-note">exigem ação da equipe</div></div><div class="metric"><div class="metric-top"><span>Vencendo em 7 dias</span><span class="metric-icon">!</span></div><div class="metric-value">4</div><div class="metric-note">prioridade alta</div></div><div class="metric"><div class="metric-top"><span>Concluídas no mês</span><span class="metric-icon">▣</span></div><div class="metric-value">41</div><div class="metric-note"><span class="up">↗ 8%</span> comparado a julho</div></div></div>
+          <div class="panel"><div class="panel-title"><h2>Agenda de entregas</h2><div class="toolbar"><select class="select"><option>Agosto/2026</option><option>Setembro/2026</option></select><select class="select"><option>Todos os tipos</option><option>Fiscal</option><option>RH</option></select></div></div><div class="table-wrap"><table><thead><tr><th>Obrigação</th><th>Empresa</th><th>Período</th><th>Vencimento</th><th>Responsável</th><th>Status</th><th>Ação</th></tr></thead><tbody id="obligationsTable"></tbody></table></div></div>
+        </section>
+
+        <section class="screen" id="screen-documentos">
+          <div class="page-heading"><div><h1>Documentos fiscais</h1><p>Centralize XMLs, PDFs e comprovantes de todas as empresas.</p></div><button class="button primary" data-action="import-xml">⇧ Importar documentos</button></div>
+          <div class="panel"><div class="upload-zone"><div style="font-size:28px;color:var(--blue)">⇧</div><strong>Arraste XMLs ou PDFs para cá</strong><small>ou selecione arquivos do seu computador — limite demonstrativo de 20 MB</small><div style="margin-top:15px"><label class="button secondary">Selecionar arquivos<input id="fileInput" type="file" multiple hidden accept=".xml,.pdf"></label></div></div><div class="search-row"><input class="input search" id="documentSearch" placeholder="Buscar documento, empresa ou chave..."><select class="select"><option>Todos os tipos</option><option>NFSe</option><option>NF-e</option><option>Comprovante</option></select><select class="select"><option>Todos os status</option><option>Pendente</option><option>Conferido</option></select></div><div class="table-wrap"><table><thead><tr><th>Documento</th><th>Empresa</th><th>Competência</th><th>Tipo</th><th>Importado em</th><th>Status</th><th>Ação</th></tr></thead><tbody id="documentsTable"></tbody></table></div></div>
+        </section>
+
+        <section class="screen" id="screen-rh">
+          <div class="page-heading"><div><h1>Folha e RH</h1><p>Primeira visão dos colaboradores, folha e eventos trabalhistas.</p></div><button class="button primary" data-action="new-employee">＋ Novo colaborador</button></div>
+          <div class="metrics"><div class="metric"><div class="metric-top"><span>Colaboradores</span><span class="metric-icon">♙</span></div><div class="metric-value">46</div><div class="metric-note">em 12 empresas</div></div><div class="metric"><div class="metric-top"><span>Folhas pendentes</span><span class="metric-icon">◷</span></div><div class="metric-value">3</div><div class="metric-note">competência agosto</div></div><div class="metric"><div class="metric-top"><span>Férias próximas</span><span class="metric-icon">▣</span></div><div class="metric-value">5</div><div class="metric-note">nos próximos 30 dias</div></div><div class="metric"><div class="metric-top"><span>Eventos eSocial</span><span class="metric-icon">✓</span></div><div class="metric-value">2</div><div class="metric-note"><span class="down">pendentes</span> de conferência</div></div></div>
+          <div class="grid-2 equal"><div class="panel"><div class="panel-title"><h2>Colaboradores recentes</h2><a data-action="show-all-employees">Ver todos</a></div><div class="table-wrap"><table><thead><tr><th>Colaborador</th><th>Empresa</th><th>Cargo</th><th>Folha</th><th>Ação</th></tr></thead><tbody id="employeesTable"></tbody></table></div></div><div class="panel"><div class="panel-title"><h2>Próximos eventos</h2><a data-screen="obrigacoes">Ver agenda</a></div><div class="obligation-row"><div class="date-box"><strong>07</strong><small>set</small></div><div class="obligation-info"><strong>Fechamento da folha</strong><small>ABC Serviços Ltda. · responsável: RH</small></div><span class="status yellow">Pendente</span></div><div class="obligation-row"><div class="date-box"><strong>15</strong><small>set</small></div><div class="obligation-info"><strong>Envio de eventos eSocial</strong><small>12 empresas · lote mensal</small></div><span class="status blue">Programado</span></div><div class="obligation-row"><div class="date-box"><strong>30</strong><small>set</small></div><div class="obligation-info"><strong>Férias de Juliana Costa</strong><small>Comercial Brasil ME</small></div><span class="status green">Em dia</span></div></div></div>
+        </section>
+
+        <section class="screen" id="screen-relatorios">
+          <div class="page-heading"><div><h1>Relatórios e contábil</h1><p>Visões gerenciais e documentos que apoiam a conferência.</p></div><button class="button primary" data-action="new-report">＋ Novo relatório</button></div>
+          <div class="grid-3"><div class="report-card"><div class="report-icon">▥</div><div><strong>Balancete demonstrativo</strong><small>Contas, saldos e movimentos por período.</small></div></div><div class="report-card"><div class="report-icon">▤</div><div><strong>DRE gerencial</strong><small>Receitas, custos e resultado mensal.</small></div></div><div class="report-card"><div class="report-icon">▣</div><div><strong>Mapa fiscal</strong><small>Receitas classificadas e pendências.</small></div></div></div>
+          <div class="grid-2 equal" style="margin-top:16px"><div class="panel"><div class="panel-title"><h2>Resultado acumulado</h2><select class="select" style="padding:6px 8px;font-size:10px"><option>2026</option><option>2025</option></select></div><div style="font-size:24px;font-weight:850;color:var(--teal)">R$ 428.760,00</div><p class="helper">Visão demonstrativa baseada nos lançamentos importados.</p><div class="chart-box"><div class="bar-item"><div class="bar" style="height:38%"></div><small>Jan</small></div><div class="bar-item"><div class="bar" style="height:48%"></div><small>Fev</small></div><div class="bar-item"><div class="bar" style="height:55%"></div><small>Mar</small></div><div class="bar-item"><div class="bar" style="height:64%"></div><small>Abr</small></div><div class="bar-item"><div class="bar" style="height:77%"></div><small>Mai</small></div><div class="bar-item"><div class="bar highlight" style="height:90%"></div><small>Jun</small></div></div></div><div class="panel"><div class="panel-title"><h2>Relatórios recentes</h2><a data-action="download-report">Baixar lista</a></div><div class="obligation-row"><div class="report-icon">PDF</div><div class="obligation-info"><strong>Mapa fiscal — Agosto/2026</strong><small>Gerado hoje às 10:42</small></div><button class="action-link" data-action="download-report">Baixar</button></div><div class="obligation-row"><div class="report-icon">PDF</div><div class="obligation-info"><strong>Folha — Julho/2026</strong><small>Gerado em 05/08/2026</small></div><button class="action-link" data-action="download-report">Baixar</button></div><div class="obligation-row"><div class="report-icon">XLS</div><div class="obligation-info"><strong>Empresas e regimes</strong><small>Gerado em 01/08/2026</small></div><button class="action-link" data-action="download-report">Baixar</button></div></div></div>
+        </section>
+
+        <section class="screen" id="screen-configuracoes">
+          <div class="page-heading"><div><h1>Configurações</h1><p>Preferências do escritório, usuários e regras demonstrativas.</p></div><button class="button primary" data-action="save-settings">Salvar alterações</button></div>
+          <div class="grid-2 equal"><div class="panel"><div class="settings-section"><h3>Dados do escritório</h3><div class="form-grid"><div class="form-field"><label>Nome do escritório</label><input class="input" value="Escritório Contábil Alves"></div><div class="form-field"><label>CNPJ</label><input class="input" value="00.000.000/0001-00"></div><div class="form-field full"><label>Mensagem exibida no portal do cliente</label><textarea class="input" rows="3">Organização hoje, tranquilidade sempre.</textarea></div></div></div><div class="settings-section"><h3>Preferências</h3><div class="check ok"><span class="check-icon">✓</span><span>Enviar lembrete automático de obrigações</span></div><div class="check ok" style="margin-top:8px"><span class="check-icon">✓</span><span>Exigir revisão antes de encerrar apuração</span></div></div></div><div class="panel"><div class="settings-section"><h3>Usuários e permissões</h3><div class="obligation-row"><div class="avatar">CA</div><div class="obligation-info"><strong>Carlos Alves</strong><small>Administrador · acesso total</small></div><span class="status green">Ativo</span></div><div class="obligation-row"><div class="avatar" style="background:#fff0dc;color:#a66b13">MF</div><div class="obligation-info"><strong>Marina Fiscal</strong><small>Fiscal · empresas atribuídas</small></div><span class="status green">Ativa</span></div><div class="obligation-row"><div class="avatar" style="background:#eee8ff;color:#7054bd">RS</div><div class="obligation-info"><strong>Rafael Souza</strong><small>RH · folha e eventos</small></div><span class="status yellow">Convite</span></div><button class="button secondary small" style="margin-top:13px" data-action="invite-user">＋ Convidar usuário</button></div><div class="settings-section"><h3>Regra fiscal</h3><p class="helper">Neste protótipo, as regras do Simples são demonstrativas. Na versão real, cada regra terá vigência, fonte normativa e testes de validação.</p></div></div></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div id="notificationPopover" class="notification-popover hidden"><h3>Notificações recentes</h3><div class="notification-item"><strong>3 documentos aguardam classificação</strong><small>ABC Serviços Ltda. · há 8 minutos</small></div><div class="notification-item"><strong>Prazo do PGDAS-D se aproxima</strong><small>4 empresas vencem nos próximos 7 dias</small></div><div class="notification-item"><strong>Convite de usuário pendente</strong><small>Rafael Souza ainda não aceitou o convite</small></div></div>
+  <div id="modalRoot"></div>
+  <div id="toastRoot" class="toast-root"></div>
+
+  <script>
+    const state = {
+      screen: 'dashboard',
+      wizardStep: 1,
+      companies: [
+        { id: 1, name: 'ABC Serviços Ltda.', cnpj: '12.345.678/0001-90', regime: 'Simples Nacional', activity: 'Serviços', competence: 'Aguardando apuração', status: 'Ativa' },
+        { id: 2, name: 'Comercial Brasil ME', cnpj: '98.765.432/0001-11', regime: 'Simples Nacional', activity: 'Comércio', competence: 'Em dia', status: 'Ativa' },
+        { id: 3, name: 'Tech Soluções Ltda.', cnpj: '56.789.123/0001-44', regime: 'Lucro Presumido', activity: 'Tecnologia', competence: 'Revisar documentos', status: 'Revisar' },
+        { id: 4, name: 'Ribeiro Consultoria Ltda.', cnpj: '11.222.333/0001-55', regime: 'Simples Nacional', activity: 'Consultoria', competence: 'Em dia', status: 'Ativa' },
+        { id: 5, name: 'Gourmet Alimentos Ltda.', cnpj: '44.555.666/0001-77', regime: 'Simples Nacional', activity: 'Alimentação', competence: 'Pendente XML', status: 'Ativa' }
+      ],
+      obligations: [
+        { name: 'PGDAS-D', company: 'ABC Serviços Ltda.', period: '08/2026', due: '20/09/2026', responsible: 'Carlos Alves', status: 'Pendente', tone: 'yellow' },
+        { name: 'DEFIS', company: 'Comercial Brasil ME', period: 'Exercício 2025', due: '30/09/2026', responsible: 'Marina Fiscal', status: 'Não iniciado', tone: 'gray' },
+        { name: 'Folha de pagamento', company: 'ABC Serviços Ltda.', period: '08/2026', due: '07/09/2026', responsible: 'Rafael Souza', status: 'Em dia', tone: 'green' },
+        { name: 'eSocial — eventos', company: '12 empresas', period: '08/2026', due: '15/09/2026', responsible: 'Rafael Souza', status: 'Pendente', tone: 'yellow' },
+        { name: 'EFD-Contribuições', company: 'Tech Soluções Ltda.', period: '08/2026', due: '10/10/2026', responsible: 'Marina Fiscal', status: 'Programado', tone: 'blue' }
+      ],
+      documents: [
+        { name: 'NFSe_000184.xml', company: 'ABC Serviços Ltda.', period: '08/2026', type: 'NFSe', imported: 'Hoje, 10:31', status: 'Conferido', tone: 'green' },
+        { name: 'NFSe_000185.xml', company: 'ABC Serviços Ltda.', period: '08/2026', type: 'NFSe', imported: 'Hoje, 10:31', status: 'Pendente', tone: 'yellow' },
+        { name: 'Comprovante_DAS_072026.pdf', company: 'Comercial Brasil ME', period: '07/2026', type: 'Comprovante', imported: '02/08/2026', status: 'Conferido', tone: 'green' },
+        { name: 'NF_009812.xml', company: 'Gourmet Alimentos Ltda.', period: '08/2026', type: 'NF-e', imported: '01/09/2026', status: 'Pendente', tone: 'yellow' }
+      ],
+      employees: [
+        { name: 'Juliana Costa', initials: 'JC', company: 'Comercial Brasil ME', role: 'Assistente administrativa', payroll: 'Em dia' },
+        { name: 'Marcos Lima', initials: 'ML', company: 'ABC Serviços Ltda.', role: 'Analista de suporte', payroll: 'Pendente' },
+        { name: 'Ana Ribeiro', initials: 'AR', company: 'Ribeiro Consultoria Ltda.', role: 'Consultora', payroll: 'Em dia' },
+        { name: 'Pedro Santos', initials: 'PS', company: 'Tech Soluções Ltda.', role: 'Desenvolvedor', payroll: 'Em conferência' }
+      ]
+    };
+
+    const screenTitles = { dashboard: 'Visão geral', empresas: 'Empresas', apuracao: 'Fiscal', obrigacoes: 'Obrigações', documentos: 'Documentos', rh: 'Folha e RH', relatorios: 'Relatórios', configuracoes: 'Configurações' };
+
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>"']/g, function(char) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[char]; });
+    }
+
+    function navigate(screen) {
+      state.screen = screen;
+      document.querySelectorAll('.screen').forEach(function(section) { section.classList.toggle('active', section.id === 'screen-' + screen); });
+      document.querySelectorAll('.nav-item').forEach(function(item) { item.classList.toggle('active', item.dataset.screen === screen); });
+      document.title = 'Contábil360 — ' + (screenTitles[screen] || 'Protótipo');
+      document.getElementById('sidebar').classList.remove('open');
+      if (screen === 'empresas') renderCompanies();
+      if (screen === 'obrigacoes') renderObligations();
+      if (screen === 'documentos') renderDocuments();
+      if (screen === 'rh') renderEmployees();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toast(message) {
+      const root = document.getElementById('toastRoot');
+      const item = document.createElement('div');
+      item.className = 'toast';
+      item.textContent = message;
+      root.appendChild(item);
+      setTimeout(function() { item.remove(); }, 3200);
+    }
+
+    function openModal(title, body, footer) {
+      document.getElementById('modalRoot').innerHTML = '<div class="modal-backdrop" data-action="close-modal"><div class="modal" onclick="event.stopPropagation()"><div class="modal-head"><h2>' + title + '</h2><button class="modal-close" data-action="close-modal">×</button></div><div class="modal-body">' + body + '</div>' + (footer ? '<div class="modal-footer">' + footer + '</div>' : '') + '</div></div>';
+    }
+
+    function closeModal() { document.getElementById('modalRoot').innerHTML = ''; }
+
+    function renderDashboardObligations() {
+      const el = document.getElementById('dashboard-obligations');
+      el.innerHTML = state.obligations.slice(0, 4).map(function(item) {
+        const day = item.due.split('/')[0];
+        const month = item.due.split('/')[1] === '09' ? 'set' : 'out';
+        return '<div class="obligation-row"><div class="date-box"><strong>' + day + '</strong><small>' + month + '</small></div><div class="obligation-info"><strong>' + item.name + '</strong><small>' + item.company + ' · ' + item.period + '</small></div><span class="status ' + item.tone + '">' + item.status + '</span></div>';
+      }).join('');
+    }
+
+    function renderCompanies() {
+      const query = (document.getElementById('companySearch')?.value || '').toLowerCase();
+      const regime = document.getElementById('companyRegime')?.value || '';
+      const status = document.getElementById('companyStatus')?.value || '';
+      const rows = state.companies.filter(function(item) {
+        return (!query || (item.name + item.cnpj).toLowerCase().includes(query)) && (!regime || item.regime === regime) && (!status || item.status === status);
+      });
+      document.getElementById('companiesTable').innerHTML = rows.length ? rows.map(function(item) {
+        const tone = item.status === 'Ativa' ? 'green' : 'yellow';
+        return '<tr><td><span class="company-name">' + escapeHTML(item.name) + '</span><span class="company-meta">' + escapeHTML(item.activity) + '</span></td><td>' + escapeHTML(item.cnpj) + '</td><td>' + escapeHTML(item.regime) + '</td><td>' + escapeHTML(item.activity) + '</td><td>' + escapeHTML(item.competence) + '</td><td><span class="status ' + tone + '">' + escapeHTML(item.status) + '</span></td><td><button class="action-link" data-action="company-details" data-company-id="' + item.id + '">Abrir</button></td></tr>';
+      }).join('') : '<tr><td colspan="7"><div class="empty">Nenhuma empresa encontrada.</div></td></tr>';
+    }
+
+    function renderObligations() {
+      document.getElementById('obligationsTable').innerHTML = state.obligations.map(function(item) {
+        return '<tr><td><strong>' + item.name + '</strong></td><td>' + item.company + '</td><td>' + item.period + '</td><td>' + item.due + '</td><td>' + item.responsible + '</td><td><span class="status ' + item.tone + '">' + item.status + '</span></td><td><button class="action-link" data-action="obligation-details">Detalhes</button></td></tr>';
+      }).join('');
+    }
+
+    function renderDocuments() {
+      document.getElementById('documentsTable').innerHTML = state.documents.map(function(item) {
+        return '<tr><td><strong>' + item.name + '</strong></td><td>' + item.company + '</td><td>' + item.period + '</td><td>' + item.type + '</td><td>' + item.imported + '</td><td><span class="status ' + item.tone + '">' + item.status + '</span></td><td><button class="action-link" data-action="document-details">Abrir</button></td></tr>';
+      }).join('');
+    }
+
+    function renderEmployees() {
+      document.getElementById('employeesTable').innerHTML = state.employees.map(function(item) {
+        const tone = item.payroll === 'Em dia' ? 'green' : item.payroll === 'Pendente' ? 'yellow' : 'blue';
+        return '<tr><td><div class="employee-card"><div class="employee-avatar">' + item.initials + '</div><div><strong>' + item.name + '</strong><small>' + item.role + '</small></div></div></td><td>' + item.company + '</td><td>' + item.role + '</td><td><span class="status ' + tone + '">' + item.payroll + '</span></td><td><button class="action-link" data-action="employee-details">Abrir</button></td></tr>';
+      }).join('');
+    }
+
+    function setWizardStep(step) {
+      state.wizardStep = Math.max(1, Math.min(5, step));
+      document.querySelectorAll('[data-wizard]').forEach(function(item) {
+        const itemStep = Number(item.dataset.wizard);
+        item.classList.toggle('active', itemStep === state.wizardStep);
+        item.classList.toggle('done', itemStep < state.wizardStep);
+      });
+      document.querySelectorAll('[data-wizard-panel]').forEach(function(item) { item.classList.toggle('active', Number(item.dataset.wizardPanel) === state.wizardStep); });
+      document.getElementById('wizardBack').disabled = state.wizardStep === 1;
+      document.getElementById('wizardBack').style.opacity = state.wizardStep === 1 ? '.5' : '1';
+      document.getElementById('wizardNext').textContent = state.wizardStep === 5 ? 'Concluir demonstração ✓' : 'Continuar →';
+    }
+
+    function showCompany(id) {
+      const item = state.companies.find(function(company) { return company.id === Number(id); });
+      if (!item) return;
+      openModal('Perfil da empresa', '<div class="summary-card"><div class="summary-line"><span>Razão social</span><strong style="font-size:13px">' + item.name + '</strong></div><div class="summary-line"><span>CNPJ</span><span>' + item.cnpj + '</span></div><div class="summary-line"><span>Regime tributário</span><span class="status blue">' + item.regime + '</span></div><div class="summary-line"><span>Atividade principal</span><span>' + item.activity + '</span></div></div><div style="margin-top:18px"><div class="panel-title"><h2>Próximas ações</h2></div><div class="check-list"><div class="check ok"><span class="check-icon">✓</span><span>Cadastro cadastral atualizado</span></div><div class="check warn"><span class="check-icon">!</span><span>Apuração de Agosto aguardando conferência</span></div><div class="check ok"><span class="check-icon">✓</span><span>Documentos do mês recebidos parcialmente</span></div></div></div>', '<button class="button" data-action="close-modal">Fechar</button><button class="button primary" data-action="company-apuration">Abrir apuração</button>');
+    }
+
+    function newCompanyModal() {
+      openModal('Cadastrar nova empresa', '<form id="newCompanyForm"><div class="form-grid"><div class="form-field full"><label>Razão social</label><input class="input" name="name" required placeholder="Ex.: Nova Empresa Ltda."></div><div class="form-field"><label>CNPJ</label><input class="input" name="cnpj" required placeholder="00.000.000/0001-00"></div><div class="form-field"><label>Regime tributário</label><select class="select" name="regime"><option>Simples Nacional</option><option>Lucro Presumido</option><option>Lucro Real</option></select></div><div class="form-field"><label>Atividade principal</label><input class="input" name="activity" required placeholder="Serviços, comércio..."></div><div class="form-field"><label>Forma de reconhecimento</label><select class="select"><option>Competência</option><option>Caixa</option></select></div></div></form>', '<button class="button" data-action="close-modal">Cancelar</button><button class="button primary" data-action="save-company">Salvar empresa</button>');
+    }
+
+    function newEmployeeModal() {
+      openModal('Novo colaborador', '<form id="newEmployeeForm"><div class="form-grid"><div class="form-field"><label>Nome completo</label><input class="input" name="name" required placeholder="Nome do colaborador"></div><div class="form-field"><label>Empresa</label><select class="select" name="company"><option>ABC Serviços Ltda.</option><option>Comercial Brasil ME</option><option>Ribeiro Consultoria Ltda.</option></select></div><div class="form-field"><label>Cargo</label><input class="input" name="role" required placeholder="Cargo"></div><div class="form-field"><label>Salário base</label><input class="input" name="salary" placeholder="R$ 0,00"></div></div></form>', '<button class="button" data-action="close-modal">Cancelar</button><button class="button primary" data-action="save-employee">Salvar colaborador</button>');
+    }
+
+    function importXmlModal() {
+      openModal('Importar documentos', '<div class="upload-zone" style="margin:0"><div style="font-size:28px;color:var(--blue)">⇧</div><strong>Selecione XMLs ou PDFs</strong><small>Esta ação é demonstrativa e não envia documentos a nenhum serviço externo.</small><div style="margin-top:15px"><label class="button secondary">Selecionar arquivos<input id="modalFileInput" type="file" multiple hidden accept=".xml,.pdf"></label></div></div>', '<button class="button" data-action="close-modal">Cancelar</button>');
+      document.getElementById('modalFileInput').addEventListener('change', function(event) {
+        const count = event.target.files.length;
+        if (count) { closeModal(); toast(count + ' documento(s) recebido(s) para processamento demonstrativo.'); }
+      });
+    }
+
+    document.addEventListener('click', function(event) {
+      const nav = event.target.closest('[data-screen]');
+      if (nav) { event.preventDefault(); navigate(nav.dataset.screen); return; }
+      const action = event.target.closest('[data-action]');
+      if (!action) return;
+      const type = action.dataset.action;
+      if (type === 'toggle-sidebar') document.getElementById('sidebar').classList.toggle('open');
+      if (type === 'toggle-notifications') document.getElementById('notificationPopover').classList.toggle('hidden');
+      if (type === 'close-modal') closeModal();
+      if (type === 'new-company') newCompanyModal();
+      if (type === 'new-employee') newEmployeeModal();
+      if (type === 'import-xml') importXmlModal();
+      if (type === 'start-apuration' || type === 'company-apuration') { closeModal(); navigate('apuracao'); setWizardStep(1); }
+      if (type === 'company-details') showCompany(action.dataset.companyId);
+      if (type === 'wizard-next') { if (state.wizardStep < 5) setWizardStep(state.wizardStep + 1); else { toast('Demonstração concluída. O resultado foi salvo apenas nesta sessão.'); navigate('dashboard'); } }
+      if (type === 'wizard-back') setWizardStep(state.wizardStep - 1);
+      if (type === 'save-company') {
+        const form = document.getElementById('newCompanyForm');
+        if (!form.reportValidity()) return;
+        const data = new FormData(form);
+        state.companies.push({ id: Date.now(), name: data.get('name'), cnpj: data.get('cnpj'), regime: data.get('regime'), activity: data.get('activity'), competence: 'Aguardando configuração', status: 'Ativa' });
+        closeModal(); navigate('empresas'); toast('Empresa cadastrada no protótipo.');
+      }
+      if (type === 'save-employee') {
+        const form = document.getElementById('newEmployeeForm');
+        if (!form.reportValidity()) return;
+        const data = new FormData(form);
+        const name = data.get('name');
+        state.employees.unshift({ name: name, initials: name.split(' ').map(function(part) { return part[0]; }).slice(0,2).join('').toUpperCase(), company: data.get('company'), role: data.get('role'), payroll: 'Pendente' });
+        closeModal(); navigate('rh'); toast('Colaborador cadastrado no protótipo.');
+      }
+      if (type === 'save-settings') toast('Preferências salvas apenas nesta sessão demonstrativa.');
+      if (type === 'invite-user') toast('Convite demonstrativo criado.');
+      if (type === 'new-obligation') toast('Lembrete demonstrativo criado.');
+      if (type === 'obligation-details') openModal('Detalhes da obrigação', '<div class="summary-card"><div class="summary-line"><span>Status</span><span class="status yellow">Aguardando ação</span></div><div class="summary-line"><span>Checklist</span><span>3 de 5 itens concluídos</span></div><div class="summary-line"><span>Responsável</span><span>Equipe fiscal</span></div></div>', '<button class="button" data-action="close-modal">Fechar</button><button class="button primary" data-action="mark-obligation">Marcar como concluída</button>');
+      if (type === 'mark-obligation') { closeModal(); toast('Obrigação marcada como concluída na demonstração.'); }
+      if (type === 'document-details') openModal('Detalhes do documento', '<div class="summary-card"><div class="summary-line"><span>Arquivo</span><strong style="font-size:12px">Documento fiscal selecionado</strong></div><div class="summary-line"><span>Validação</span><span class="status green">Estrutura válida</span></div><div class="summary-line"><span>Classificação</span><span class="status yellow">Pendente</span></div></div>', '<button class="button" data-action="close-modal">Fechar</button><button class="button primary" data-action="classify-document">Classificar</button>');
+      if (type === 'classify-document') { closeModal(); toast('Documento classificado na demonstração.'); }
+      if (type === 'employee-details') openModal('Ficha do colaborador', '<div class="summary-card"><div class="summary-line"><span>Colaborador</span><strong style="font-size:13px">Colaborador selecionado</strong></div><div class="summary-line"><span>Competência</span><span>Agosto/2026</span></div><div class="summary-line"><span>Folha</span><span class="status blue">Em conferência</span></div><div class="summary-line"><span>Eventos</span><span>5 lançamentos</span></div></div>', '<button class="button" data-action="close-modal">Fechar</button><button class="button primary" data-action="employee-payroll">Abrir folha</button>');
+      if (type === 'employee-payroll') { closeModal(); toast('Módulo de folha aberto na demonstração.'); }
+      if (type === 'download-report') toast('Relatório demonstrativo preparado para download.');
+      if (type === 'new-report') toast('Assistente de relatório aberto na demonstração.');
+      if (type === 'show-all-employees') toast('A lista já exibe os colaboradores recentes.');
+    });
+
+    ['companySearch','companyRegime','companyStatus'].forEach(function(id) {
+      const element = document.getElementById(id);
+      if (element) element.addEventListener('input', renderCompanies);
+      if (element) element.addEventListener('change', renderCompanies);
+    });
+    document.getElementById('fileInput').addEventListener('change', function(event) {
+      const count = event.target.files.length;
+      if (count) { toast(count + ' documento(s) recebido(s) para processamento demonstrativo.'); }
+    });
+
+    renderDashboardObligations();
+    renderCompanies();
+    renderObligations();
+    renderDocuments();
+    renderEmployees();
+    setWizardStep(1);
+  </script>
+</body>
+</html>
